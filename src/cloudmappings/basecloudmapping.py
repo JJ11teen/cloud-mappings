@@ -1,4 +1,4 @@
-from typing import MutableMapping
+from typing import MutableMapping, Dict
 from urllib.parse import quote, unquote
 
 from .cloudstorage.cloudstorage import CloudStorage
@@ -15,12 +15,12 @@ def _unsafe_key(key: str) -> str:
 
 
 class CloudStorageMapping(MutableMapping):
-    etags: dict[str, str]
+    etags: Dict[str, str]
 
     def __init__(
         self,
         cloudstorage: CloudStorage,
-        metadata: dict[str, str],
+        metadata: Dict[str, str],
     ) -> None:
         self._cloudstorage = cloudstorage
         self.etags = {}
