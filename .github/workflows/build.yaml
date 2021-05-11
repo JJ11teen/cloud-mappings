@@ -1,0 +1,16 @@
+name: Build
+on: [push]
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: python3 -m pip install --user --upgrade build twine
+      - run: python3 -m build
+      - run: python3 -m twine upload --skip-existing --verbose dist/*
+      - name: Upload output dist
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/*
