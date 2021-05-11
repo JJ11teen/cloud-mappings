@@ -12,12 +12,10 @@
 		"terminal.integrated.defaultProfile.linux": "/bin/bash",
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.languageServer": "Pylance",
-		"python.linting.enabled": true,
-		"python.linting.blackEnabled": true,
-		"python.linting.black": "/usr/local/bin/black",
-		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
-		"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
-		"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+		"python.linting.enabled": false,
+		"editor.formatOnSave": true,
+		"python.formatting.provider" : "black",
+		"python.formatting.black": "/usr/local/bin/black",
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
