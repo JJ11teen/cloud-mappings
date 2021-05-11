@@ -55,7 +55,4 @@ class AzureBlobStorage(CloudStorage):
         )
 
     def list_keys_and_ids(self, key_prefix: str) -> Dict[str, str]:
-        return {
-            b.name: b.etag
-            for b in self._container_client.list_blobs(name_starts_with=key_prefix)
-        }
+        return {b.name: b.etag for b in self._container_client.list_blobs(name_starts_with=key_prefix)}

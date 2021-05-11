@@ -29,19 +29,12 @@ class CloudStorageMapping(MutableMapping):
 
     def sync_with_cloud(self, key: str = None) -> None:
         prefix_key = _safe_key(key) if key is not None else None
-        self.etags.update(
-            {
-                _unsafe_key(k): i
-                for k, i in self._cloudstorage.list_keys_and_ids(prefix_key).items()
-            }
-        )
+        self.etags.update({_unsafe_key(k): i for k, i in self._cloudstorage.list_keys_and_ids(prefix_key).items()})
 
     def __getitem__(self, key: str) -> bytes:
         if key not in self.etags:
             raise KeyError(key)
-        return self._cloudstorage.download_data(
-            key=_safe_key(key), etag=self.etags[key]
-        )
+        return self._cloudstorage.download_data(key=_safe_key(key), etag=self.etags[key])
 
     def __setitem__(self, key: str, value: bytes) -> None:
         self.etags[key] = self._cloudstorage.upload_data(
@@ -72,9 +65,7 @@ class CloudStorageMapping(MutableMapping):
         from zict import Func
 
         if len(io_buffers) % 2 != 0:
-            raise ValueError(
-                "Must have an equal number of input buffers as output buffers"
-            )
+            raise ValueError("Must have an equal number of input buffers as output buffers")
 
         raw_mapping = cls(**kwargs)
         mapping = raw_mapping
@@ -101,6 +92,4 @@ class CloudStorageMapping(MutableMapping):
     ) -> MutableMapping:
         import zlib, pickle
 
-        return cls.create_with_buffers(
-            zlib.compress, zlib.decompress, pickle.dumps, pickle.loads, **kwargs
-        )
+        return cls.create_with_buffers(zlib.compress, zlib.decompress, pickle.dumps, pickle.loads, **kwargs)

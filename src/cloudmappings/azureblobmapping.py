@@ -1,6 +1,6 @@
 from typing import Dict
 
-from .basecloudmapping import CloudStorageMapping
+from .cloudstoragemapping import CloudStorageMapping
 
 
 class AzureBlobMapping(CloudStorageMapping):
