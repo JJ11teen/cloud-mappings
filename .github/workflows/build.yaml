@@ -6,9 +6,10 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: python3 -m pip install --user --upgrade build twine
-      - run: python3 -m build
-      - run: python3 -m twine upload --skip-existing --verbose dist/*
+      - name: Upgrade build package
+        run: python3 -m pip install --user --upgrade build
+      - name: Run build
+        run: python3 -m build
       - name: Upload output dist
         uses: actions/upload-artifact@v2
         with:
