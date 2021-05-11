@@ -4,4 +4,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.7
 # Install/upgrade build and twine
 RUN python3 -m pip install --upgrade \
     build \
-    twine
+    twine \
+    black \
+    azure-storage-blob \
+    boto3 \
+    google-cloud-storage
