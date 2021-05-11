@@ -4,3 +4,13 @@ requires = [
     "wheel",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 120
+target-version = ["py37", "py38", "py39"]
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+python_files = "*.py"
+python_classes = "*Tests"
+python_functions = "test_*"
