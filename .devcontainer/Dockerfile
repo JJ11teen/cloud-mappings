@@ -6,6 +6,8 @@ RUN python3 -m pip install --upgrade \
     build \
     twine \
     black \
+    pytest \
+    zict \
     azure-storage-blob \
     boto3 \
     google-cloud-storage
