@@ -31,7 +31,7 @@ class AzureBlobStorage(CloudStorage):
         return self._container_client.download_blob(
             blob=key,
             etag=etag,
-            match_condition=MatchConditions.IfNotModified,
+            match_condition=MatchConditions.IfNotModified if etag is not None else None,
         ).readall()
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
