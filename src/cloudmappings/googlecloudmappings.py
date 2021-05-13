@@ -13,9 +13,9 @@ class GoogleCloudStorageMapping(CloudStorageMapping):
     ) -> None:
         from .cloudstorage.googlecloudstorage import GoogleCloudStorage
 
-        azureblobstorage = GoogleCloudStorage(
+        gcp_gcs = GoogleCloudStorage(
             project=project,
             credentials=credentials,
             bucket_name=bucket_name,
         )
-        super().__init__(azureblobstorage, metadata)
+        super().__init__(gcp_gcs, metadata)
