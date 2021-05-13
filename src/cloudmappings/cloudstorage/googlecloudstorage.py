@@ -21,6 +21,9 @@ class GoogleCloudStorage(CloudStorage):
             bucket_name=bucket_name,
         )
 
+    def safe_name(self) -> str:
+        return "GoogleCloudStorage," f"Project={self._client.project}," f"BucketName={self._bucket.name}"
+
     def create_if_not_exists(self, metadata: Dict[str, str]):
         exists = False
         try:

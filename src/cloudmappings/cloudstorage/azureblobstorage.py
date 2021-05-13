@@ -20,6 +20,13 @@ class AzureBlobStorage(CloudStorage):
             credential=credential,
         )
 
+    def safe_name(self) -> str:
+        return (
+            "AzureBlobStorage,"
+            f"StorageAccountName={self._container_client.name},"
+            f"ContainerName={self._container_client.container_name}"
+        )
+
     def create_if_not_exists(self, metadata: Dict[str, str]):
         try:
             self._container_client.create_container(metadata=metadata)
