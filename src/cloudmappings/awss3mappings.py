@@ -14,4 +14,4 @@ class AWSS3Mapping(CloudStorageMapping):
         aws_s3 = AWSS3(
             bucket_name=bucket_name,
         )
-        super().__init__(aws_s3, metadata)
+        super().__init__(cloudstorage=aws_s3, metadata=metadata)

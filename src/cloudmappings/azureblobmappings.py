@@ -18,4 +18,4 @@ class AzureBlobMapping(CloudStorageMapping):
             container_name=container_name,
             credential=credential,
         )
-        super().__init__(azureblobstorage, metadata)
+        super().__init__(cloudstorage=azureblobstorage, metadata=metadata)

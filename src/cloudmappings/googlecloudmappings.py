@@ -18,4 +18,4 @@ class GoogleCloudStorageMapping(CloudStorageMapping):
             credentials=credentials,
             bucket_name=bucket_name,
         )
-        super().__init__(gcp_gcs, metadata)
+        super().__init__(cloudstorage=gcp_gcs, metadata=metadata)
