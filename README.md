@@ -1,7 +1,7 @@
 # cloud-mappings
-MutableMapping interfaces for common cloud storage providers
+MutableMapping implementations for common cloud storage providers
 
-For now only, `AzureBlobMapping` is implemented.
+For now `AzureBlobMapping` and `GoogleCloudStorageMapping` are implemented. AWS S3 is next on the list.
 
 ## Installation
 
