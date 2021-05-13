@@ -37,6 +37,8 @@ class CloudStorageMapping(MutableMapping):
         return self._cloudstorage.download_data(key=_safe_key(key), etag=self.etags[key])
 
     def __setitem__(self, key: str, value: bytes) -> None:
+        if not isinstance(value, bytes):
+            raise ValueError("Value must be bytes like")
         self.etags[key] = self._cloudstorage.upload_data(
             key=_safe_key(key),
             etag=self.etags.get(key, None),
