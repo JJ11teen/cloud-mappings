@@ -1,23 +1,25 @@
 name: Build
-on:
-  pull_request:
-    branches: [ "*" ]
+on: [push]
 jobs:
-  Build:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-      - name: Upgrade build package
-        run: python3 -m pip install --user --upgrade build
-      - name: Install locally
-        run: python3 -m pip install .
-      - name: Run tests
-        run: pytest
-      - name: Run build
-        run: python3 -m build
-      - name: Upload output dist
-        uses: actions/upload-artifact@v2
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          name: dist
-          path: dist/*
+          python-version: ${{ matrix.python-version }}
+      - name: Run Black
+        uses: psf/black@stable
+        with:
+          src: "./src"
+      - name: Install dependencies, for extras and tests too
+        run: |
+          python -m pip install --upgrade pip
+          pip pip install .[tests,azure,gcp,aws]
+      - name: Test with pytest
+        run: |
+          pytest
