@@ -4,10 +4,10 @@ from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError
 from azure.storage.blob import ContainerClient
 
-from .cloudstorage import CloudStorage
+from .storageprovider import StorageProvider
 
 
-class AzureBlobStorageProvider(CloudStorage):
+class AzureBlobStorageProvider(StorageProvider):
     def __init__(
         self,
         account_url: str,

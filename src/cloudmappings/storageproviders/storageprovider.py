@@ -2,25 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict
 
 
-class KeyCloudSyncError(ValueError):
-    def __init__(self, cloud_storage: "CloudStorage", key: str, etag: str) -> None:
-        super().__init__(
-            f"Mapping is out of sync with cloud data.\n"
-            f"Cloud storage: '{cloud_storage.safe_name()}'\n"
-            f"Key: '{key}', etag: '{etag}'"
-        )
-
-
-class ValueMaxSizeError(ValueError):
-    def __init__(self, cloud_storage: "CloudStorage", key, size) -> None:
-        super().__init__(
-            f"Value is too big to fit in cloud."
-            f"Cloud storage: '{cloud_storage.safe_name()}'\n"
-            f"Key: '{key}', size: '{size}'"
-        )
-
-
-class CloudStorage(ABC):
+class StorageProvider(ABC):
     @abstractmethod
     def safe_name(self) -> str:
         """Returns a human readable string identifying the current implementation, and which logical cloud resouce it is currently mapping to. Does not include any credential information.
@@ -72,3 +54,21 @@ class CloudStorage(ABC):
         :return: Dict mapping keys as str, to their etags as str.
         """
         pass
+
+
+class KeyCloudSyncError(ValueError):
+    def __init__(self, cloud_storage: StorageProvider, key: str, etag: str) -> None:
+        super().__init__(
+            f"Mapping is out of sync with cloud data.\n"
+            f"Cloud storage: '{cloud_storage.safe_name()}'\n"
+            f"Key: '{key}', etag: '{etag}'"
+        )
+
+
+class ValueMaxSizeError(ValueError):
+    def __init__(self, cloud_storage: StorageProvider, key, size) -> None:
+        super().__init__(
+            f"Value is too big to fit in cloud."
+            f"Cloud storage: '{cloud_storage.safe_name()}'\n"
+            f"Key: '{key}', size: '{size}'"
+        )

@@ -3,10 +3,10 @@ from typing import Dict
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
 
-from .cloudstorage import CloudStorage, KeyCloudSyncError
+from .storageprovider import StorageProvider, KeyCloudSyncError
 
 
-class GoogleCloudStorageProvider(CloudStorage):
+class GoogleCloudStorageProvider(StorageProvider):
     def __init__(
         self,
         project: str,

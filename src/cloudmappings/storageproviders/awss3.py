@@ -3,13 +3,13 @@ from uuid import uuid4
 
 import boto3
 
-from .cloudstorage import CloudStorage, KeyCloudSyncError
+from .storageprovider import StorageProvider, KeyCloudSyncError
 
 
 _metadata_etag_key = "cloud-mappings-etag"
 
 
-class AWSS3Provider(CloudStorage[str]):
+class AWSS3Provider(StorageProvider[str]):
     def __init__(
         self,
         bucket_name: str,
