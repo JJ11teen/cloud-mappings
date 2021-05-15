@@ -11,7 +11,7 @@ class GoogleCloudStorageMapping(CloudStorageMapping):
         credentials=None,
         metadata: Dict[str, str] = None,
     ) -> None:
-        from .cloudstorage.googlecloudstorage import GoogleCloudStorage
+        from .storageproviders.googlecloudstorage import GoogleCloudStorage
 
         gcp_gcs = GoogleCloudStorage(
             project=project,

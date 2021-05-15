@@ -11,7 +11,7 @@ class AzureBlobMapping(CloudStorageMapping):
         credential=None,
         metadata: Dict[str, str] = None,
     ) -> None:
-        from .cloudstorage.azureblobstorage import AzureBlobStorage
+        from .storageproviders.azureblobstorage import AzureBlobStorage
 
         azureblobstorage = AzureBlobStorage(
             account_url=account_url,

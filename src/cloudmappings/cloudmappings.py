@@ -1,7 +1,7 @@
 from typing import MutableMapping, Dict
 from urllib.parse import quote, unquote
 
-from .cloudstorage.cloudstorage import CloudStorage
+from .storageproviders.cloudstorage import CloudStorage
 
 
 def _safe_key(key: str) -> str:
