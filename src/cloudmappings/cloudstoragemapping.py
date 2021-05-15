@@ -61,14 +61,17 @@ class CloudStorageMapping(MutableMapping):
     def __len__(self) -> int:
         return len(self.etags)
 
+    def __repr__(self) -> str:
+        return f"cloudmapping<{self._storageprovider.safe_name()}>"
+
     @classmethod
-    def create_with_buffers(cls, *io_buffers, **kwargs) -> MutableMapping:
+    def with_buffers(cls, io_buffers, *args, **kwargs) -> MutableMapping:
         from zict import Func
 
         if len(io_buffers) % 2 != 0:
             raise ValueError("Must have an equal number of input buffers as output buffers")
 
-        raw_mapping = cls(**kwargs)
+        raw_mapping = cls(*args, **kwargs)
         mapping = raw_mapping
 
         for dump, load in zip(io_buffers[::2], io_buffers[1::2]):
@@ -78,28 +81,23 @@ class CloudStorageMapping(MutableMapping):
         return mapping
 
     @classmethod
-    def with_pickle(
-        cls,
-        **kwargs,
-    ) -> MutableMapping:
+    def with_pickle(cls, *args, **kwargs) -> MutableMapping:
         import pickle
 
-        return cls.create_with_buffers(pickle.dumps, pickle.loads, **kwargs)
+        return cls.with_buffers([pickle.dumps, pickle.loads], *args, **kwargs)
 
     @classmethod
-    def with_json(
-        cls,
-        **kwargs,
-    ) -> MutableMapping:
+    def with_json(cls, *args, **kwargs) -> MutableMapping:
         import json
 
-        return cls.create_with_buffers(json.dumps, json.loads, **kwargs)
+        return cls.with_buffers([json.dumps, json.loads], *args, **kwargs)
 
     @classmethod
-    def with_json_zlib(
-        cls,
-        **kwargs,
-    ) -> MutableMapping:
+    def with_json_zlib(cls, *args, **kwargs) -> MutableMapping:
         import json, zlib
 
-        return cls.create_with_buffers(json.dumps, json.loads, zlib.compress, zlib.decompress, **kwargs)
+        return cls.with_buffers(
+            [json.dumps, json.loads, zlib.compress, zlib.decompress],
+            *args,
+            **kwargs,
+        )
