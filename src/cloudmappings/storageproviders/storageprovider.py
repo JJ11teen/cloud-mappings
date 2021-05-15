@@ -11,7 +11,7 @@ class StorageProvider(ABC):
         pass
 
     @abstractmethod
-    def create_if_not_exists(self, metadata: Dict[str, str]) -> bool:
+    def create_if_not_exists(self) -> bool:
         """Create a new parent resource for the data in cloud storage.
         Terminology various between cloud providers:
             * Azure Blob Storage: A Blob Container

@@ -12,13 +12,15 @@ class AzureBlobStorageProvider(StorageProvider):
         self,
         account_url: str,
         container_name: str,
-        credential,
+        credential=None,
+        create_container_metadata=None,
     ) -> None:
         self._container_client = ContainerClient(
             account_url=account_url,
             container_name=container_name,
             credential=credential,
         )
+        self._create_container_metadata = create_container_metadata
 
     def safe_name(self) -> str:
         return (
@@ -27,9 +29,9 @@ class AzureBlobStorageProvider(StorageProvider):
             f"ContainerName={self._container_client.container_name}"
         )
 
-    def create_if_not_exists(self, metadata: Dict[str, str]):
+    def create_if_not_exists(self):
         try:
-            self._container_client.create_container(metadata=metadata)
+            self._container_client.create_container(metadata=self._create_container_metadata)
         except ResourceExistsError:
             return True
         return False
