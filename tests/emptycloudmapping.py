@@ -1,54 +1,46 @@
 import pytest
 
-from .mock.memorystorage import MemoryStorage
-from cloudmappings.cloudstoragemapping import CloudStorageMapping
-
 
 class EmptyCloudMappingTests:
-    def test_basic_setting_and_getting(self):
-        store = CloudStorageMapping(MemoryStorage(None), None)
+    @pytest.fixture(autouse=True)
+    def run_before_and_after_tests(self, cloud_mapping):
+        for k in list(cloud_mapping.keys()):
+            del cloud_mapping[k]
 
-        store["key-A"] = b"100"
-        store["key-a"] = b"uncapitalised"
-        store["key-3"] = b"three"
+    def test_basic_setting_and_getting(self, cloud_mapping):
+        cloud_mapping["key-A"] = b"100"
+        cloud_mapping["key-a"] = b"uncapitalised"
+        cloud_mapping["key-3"] = b"three"
 
-        assert store["key-A"] == b"100"
-        assert store["key-a"] == b"uncapitalised"
-        assert store["key-3"] == b"three"
+        assert cloud_mapping["key-A"] == b"100"
+        assert cloud_mapping["key-a"] == b"uncapitalised"
+        assert cloud_mapping["key-3"] == b"three"
 
-    def test_complex_keys(self):
-        store = CloudStorageMapping(MemoryStorage(None), None)
+    def test_complex_keys(self, cloud_mapping):
+        cloud_mapping["here/are/some/sub/dirs"] = b"0"
+        cloud_mapping["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
 
-        store["here/are/some/sub/dirs"] = b"0"
-        store["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
+        assert cloud_mapping["here/are/some/sub/dirs"] == b"0"
+        assert cloud_mapping["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
 
-        assert store["here/are/some/sub/dirs"] == b"0"
-        assert store["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
-
-    def test_deleting_keys(self):
-        store = CloudStorageMapping(MemoryStorage(None), None)
-
-        store["1"] = 1
-        assert store["1"] == 1
-
-        del store["1"]
+    def test_deleting_keys(self, cloud_mapping):
+        cloud_mapping["1"] = b"0"
+        del cloud_mapping["1"]
         with pytest.raises(KeyError):
-            store["1"]
+            cloud_mapping["1"]
 
-    def test_contains(self):
-        store = CloudStorageMapping(MemoryStorage(None), None)
-        assert "1" not in store
+    def test_contains(self, cloud_mapping):
+        assert "1" not in cloud_mapping
 
-        store["1"] = 1
-        assert "1" in store
+        cloud_mapping["1"] = b"1"
+        assert "1" in cloud_mapping
 
-    def test_length(self):
-        store = CloudStorageMapping(MemoryStorage(None), None)
-        assert len(store) == 0
+    def test_length(self, cloud_mapping):
+        assert len(cloud_mapping) == 0
 
-        store["a"] = b"100"
-        store["b"] = b"uncapitalised"
-        assert len(store) == 2
+        cloud_mapping["a"] = b"100"
+        cloud_mapping["b"] = b"uncapitalised"
+        assert len(cloud_mapping) == 2
 
-        store["c"] = b"three"
-        assert len(store) == 3
+        cloud_mapping["c"] = b"three"
+        assert len(cloud_mapping) == 3
