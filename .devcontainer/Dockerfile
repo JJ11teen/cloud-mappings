@@ -12,9 +12,4 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
 RUN python3 -m pip install --upgrade \
     build \
     twine \
-    black \
-    pytest \
-    zict \
-    azure-storage-blob \
-    boto3 \
-    google-cloud-storage
+    black
