@@ -1,7 +1,7 @@
 from typing import MutableMapping, Dict
 from urllib.parse import quote, unquote
 
-from .storageproviders.cloudstorage import CloudStorage
+from .storageproviders.storageprovider import StorageProvider
 
 
 def _safe_key(key: str) -> str:
@@ -19,27 +19,26 @@ class CloudStorageMapping(MutableMapping):
 
     def __init__(
         self,
-        cloudstorage: CloudStorage,
-        metadata: Dict[str, str],
+        storageprovider: StorageProvider,
     ) -> None:
-        self._cloudstorage = cloudstorage
+        self._storageprovider = storageprovider
         self.etags = {}
-        if self._cloudstorage.create_if_not_exists(metadata=metadata):
+        if self._storageprovider.create_if_not_exists():
             self.sync_with_cloud()
 
     def sync_with_cloud(self, key: str = None) -> None:
         prefix_key = _safe_key(key) if key is not None else None
-        self.etags.update({_unsafe_key(k): i for k, i in self._cloudstorage.list_keys_and_ids(prefix_key).items()})
+        self.etags.update({_unsafe_key(k): i for k, i in self._storageprovider.list_keys_and_ids(prefix_key).items()})
 
     def __getitem__(self, key: str) -> bytes:
         if key not in self.etags:
             raise KeyError(key)
-        return self._cloudstorage.download_data(key=_safe_key(key), etag=self.etags[key])
+        return self._storageprovider.download_data(key=_safe_key(key), etag=self.etags[key])
 
     def __setitem__(self, key: str, value: bytes) -> None:
         if not isinstance(value, bytes):
             raise ValueError("Value must be bytes like")
-        self.etags[key] = self._cloudstorage.upload_data(
+        self.etags[key] = self._storageprovider.upload_data(
             key=_safe_key(key),
             etag=self.etags.get(key, None),
             data=value,
@@ -48,7 +47,7 @@ class CloudStorageMapping(MutableMapping):
     def __delitem__(self, key: str) -> None:
         if key not in self.etags:
             raise KeyError(key)
-        self._cloudstorage.delete_data(key=_safe_key(key), etag=self.etags[key])
+        self._storageprovider.delete_data(key=_safe_key(key), etag=self.etags[key])
         del self.etags[key]
 
     def __contains__(self, key: str) -> bool:
