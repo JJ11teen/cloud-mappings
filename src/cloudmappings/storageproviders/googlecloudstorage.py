@@ -3,7 +3,7 @@ from typing import Dict
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
 
-from .storageprovider import StorageProvider, KeyCloudSyncError
+from .storageprovider import StorageProvider
 
 
 class GoogleCloudStorageProvider(StorageProvider):
@@ -39,7 +39,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             blob_name=key,
         )
         if etag is not None and (b is None or etag != b.md5_hash):
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
         return b.download_as_bytes(
             if_generation_match=b.generation,
         )
@@ -49,7 +49,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             blob_name=key,
         )
         if b is not None and (etag is None or etag != b.md5_hash):
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
         if b is None:
             b = self._bucket.blob(
                 blob_name=key,
@@ -66,7 +66,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             blob_name=key,
         )
         if b is None or etag != b.md5_hash:
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
         self._bucket.delete_blob(
             blob_name=key,
             if_generation_match=b.generation,

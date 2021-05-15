@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import boto3
 
-from .storageprovider import StorageProvider, KeyCloudSyncError
+from .storageprovider import StorageProvider
 
 
 _metadata_etag_key = "cloud-mappings-etag"
@@ -44,13 +44,13 @@ class AWSS3Provider(StorageProvider):
     def download_data(self, key: str, etag: str) -> bytes:
         body, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if etag is not None and (body is None or etag != existing_etag):
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
         return body.read()
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         body, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if body is not None and (etag is None or etag != existing_etag):
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
 
         new_etag = uuid4()
         self._client.put_object(
@@ -66,7 +66,7 @@ class AWSS3Provider(StorageProvider):
     def delete_data(self, key: str, etag: str) -> None:
         body, existing_etag, version_id = self._get_body_etag_version_id_if_exists(key)
         if body is None or etag != existing_etag:
-            raise KeyCloudSyncError(key=key, etag=etag)
+            self.raise_key_sync_error(key=key, etag=etag)
         self._client.delete_object(
             Bucket=self._bucket_name,
             Key=key,
