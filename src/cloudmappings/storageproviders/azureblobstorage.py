@@ -1,4 +1,5 @@
 from typing import Dict
+import json
 
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
@@ -60,7 +61,7 @@ class AzureBlobStorageProvider(StorageProvider):
             )
         except ResourceModifiedError:
             self.raise_key_sync_error(key=key, etag=etag)
-        return response["etag"]
+        return json.loads(response["etag"])
 
     def delete_data(self, key: str, etag: str) -> None:
         try:
