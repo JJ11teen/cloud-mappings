@@ -9,9 +9,9 @@ class AWSS3Mapping(CloudStorageMapping):
         bucket_name: str,
         metadata: Dict[str, str] = None,
     ) -> None:
-        from .storageproviders.awss3 import AWSS3
+        from .storageproviders.awss3 import AWSS3Provider
 
-        aws_s3 = AWSS3(
+        aws_s3 = AWSS3Provider(
             bucket_name=bucket_name,
         )
         super().__init__(cloudstorage=aws_s3, metadata=metadata)

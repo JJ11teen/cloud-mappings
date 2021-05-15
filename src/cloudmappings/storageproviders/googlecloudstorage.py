@@ -6,7 +6,7 @@ from google.cloud.exceptions import Conflict
 from .cloudstorage import CloudStorage, KeyCloudSyncError
 
 
-class GoogleCloudStorage(CloudStorage):
+class GoogleCloudStorageProvider(CloudStorage):
     def __init__(
         self,
         project: str,

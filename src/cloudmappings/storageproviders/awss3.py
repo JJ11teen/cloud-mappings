@@ -9,7 +9,7 @@ from .cloudstorage import CloudStorage, KeyCloudSyncError
 _metadata_etag_key = "cloud-mappings-etag"
 
 
-class AWSS3(CloudStorage[str]):
+class AWSS3Provider(CloudStorage[str]):
     def __init__(
         self,
         bucket_name: str,

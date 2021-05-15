@@ -7,7 +7,7 @@ from azure.storage.blob import ContainerClient
 from .cloudstorage import CloudStorage
 
 
-class AzureBlobStorage(CloudStorage):
+class AzureBlobStorageProvider(CloudStorage):
     def __init__(
         self,
         account_url: str,
