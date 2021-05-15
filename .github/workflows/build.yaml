@@ -13,13 +13,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Run Black
-        uses: psf/black@stable
-        with:
-          src: "./src"
+        run: |
+          python -m pip install black
+          black --check --diff src
       - name: Install dependencies, for extras and tests too
         run: |
           python -m pip install --upgrade pip
-          pip pip install .[tests,azure,gcp,aws]
-      - name: Test with pytest
+          pip install .[tests,azure,gcp,aws]
+      - name: Test with black and pytest
         run: |
           pytest
