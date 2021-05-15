@@ -1,6 +1,8 @@
 # cloud-mappings
 MutableMapping implementations for common cloud storage providers
 
+![Build](https://github.com/JJ11teen/cloud-mappings/actions/workflows/build.yaml/badge.svg)
+
 For now `AzureBlobMapping` and `GoogleCloudStorageMapping` are implemented. AWS S3 is next on the list.
 
 ## Installation
