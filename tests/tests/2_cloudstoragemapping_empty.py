@@ -44,3 +44,17 @@ class EmptyCloudMappingTests:
 
         cloud_mapping["c"] = b"three"
         assert len(cloud_mapping) == 3
+
+    def test_repr(self, cloud_mapping):
+        _repr = str(cloud_mapping)
+
+        assert "CloudStorageProvider=" in _repr
+
+        if "Azure" in _repr:
+            assert "StorageAccountName=" in _repr
+            assert "ContainerName=" in _repr
+        elif "Google" in _repr:
+            assert "Project=" in _repr
+            assert "BucketName=" in _repr
+        elif "AWS" in _repr:
+            assert "BucketName=" in _repr

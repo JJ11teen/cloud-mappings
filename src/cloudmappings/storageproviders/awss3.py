@@ -18,7 +18,7 @@ class AWSS3Provider(StorageProvider):
         self._bucket_name = bucket_name
 
     def safe_name(self) -> str:
-        return "AWSS3," f"BucketName={self._bucket_name}"
+        return "CloudStorageProvider=AWSS3," f"BucketName={self._bucket_name}"
 
     def create_if_not_exists(self, metadata: Dict[str, str]):
         bucket = boto3.resource("s3").Bucket(self._bucket_name)

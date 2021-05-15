@@ -25,7 +25,7 @@ class AzureBlobStorageProvider(StorageProvider):
 
     def safe_name(self) -> str:
         return (
-            "AzureBlobStorage,"
+            "CloudStorageProvider=AzureBlobStorage,"
             f"StorageAccountName={self._container_client.account_name},"
             f"ContainerName={self._container_client.container_name}"
         )
