@@ -28,7 +28,7 @@ class CloudStorageMapping(MutableMapping):
 
     def sync_with_cloud(self, key: str = None) -> None:
         prefix_key = _safe_key(key) if key is not None else None
-        self.etags.update({_unsafe_key(k): i for k, i in self._storageprovider.list_keys_and_ids(prefix_key).items()})
+        self.etags.update({_unsafe_key(k): i for k, i in self._storageprovider.list_keys_and_etags(prefix_key).items()})
 
     def __getitem__(self, key: str) -> bytes:
         if key not in self.etags:

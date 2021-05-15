@@ -73,7 +73,7 @@ class AWSS3Provider(StorageProvider):
             VersionId=version_id,
         )
 
-    def list_keys_and_ids(self, key_prefix: str) -> Dict[str, str]:
+    def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         bucket = boto3.resource("s3").Bucket(self._bucket_name)
         return {
             o.key: o.Object.metadata[_metadata_etag_key]

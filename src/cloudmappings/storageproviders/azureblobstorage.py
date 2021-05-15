@@ -1,7 +1,7 @@
 from typing import Dict
 
 from azure.core import MatchConditions
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
 from azure.storage.blob import ContainerClient
 
 from .storageprovider import StorageProvider
@@ -37,11 +37,14 @@ class AzureBlobStorageProvider(StorageProvider):
         return False
 
     def download_data(self, key: str, etag: str) -> bytes:
-        return self._container_client.download_blob(
-            blob=key,
-            etag=etag,
-            match_condition=MatchConditions.IfNotModified if etag is not None else None,
-        ).readall()
+        try:
+            return self._container_client.download_blob(
+                blob=key,
+                etag=etag,
+                match_condition=MatchConditions.IfNotModified if etag is not None else None,
+            ).readall()
+        except ResourceModifiedError:
+            self.raise_key_sync_error(key=key, etag=etag)
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         expecting_blob = etag is not None
@@ -50,18 +53,24 @@ class AzureBlobStorageProvider(StorageProvider):
             args["etag"] = etag
             args["match_condition"] = MatchConditions.IfNotModified
         bc = self._container_client.get_blob_client(blob=key)
-        response = bc.upload_blob(
-            data=data,
-            **args,
-        )
+        try:
+            response = bc.upload_blob(
+                data=data,
+                **args,
+            )
+        except ResourceModifiedError:
+            self.raise_key_sync_error(key=key, etag=etag)
         return response["etag"]
 
     def delete_data(self, key: str, etag: str) -> None:
-        self._container_client.delete_blob(
-            blob=key,
-            etag=etag,
-            match_condition=MatchConditions.IfNotModified,
-        )
+        try:
+            self._container_client.delete_blob(
+                blob=key,
+                etag=etag,
+                match_condition=MatchConditions.IfNotModified,
+            )
+        except ResourceModifiedError:
+            self.raise_key_sync_error(key=key, etag=etag)
 
-    def list_keys_and_ids(self, key_prefix: str) -> Dict[str, str]:
+    def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         return {b.name: b.etag for b in self._container_client.list_blobs(name_starts_with=key_prefix)}

@@ -72,7 +72,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             if_generation_match=b.generation,
         )
 
-    def list_keys_and_ids(self, key_prefix: str) -> Dict[str, str]:
+    def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         keys_and_ids = {
             b.name: b.md5_hash
             for b in self._client.list_blobs(

@@ -72,7 +72,7 @@ class StorageProvider(ABC):
         pass
 
     @abstractmethod
-    def list_keys_and_ids(self, key_prefix: str) -> Dict[str, str]:
+    def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         """List all keys within cloud storage, and their associated etags at the time of
         listing.
         :return: Dict mapping keys as str, to their etags as str.
