@@ -78,7 +78,7 @@ class CloudStorageMapping(MutableMapping):
         return mapping
 
     @classmethod
-    def create_with_pickle(
+    def with_pickle(
         cls,
         **kwargs,
     ) -> MutableMapping:
@@ -87,10 +87,19 @@ class CloudStorageMapping(MutableMapping):
         return cls.create_with_buffers(pickle.dumps, pickle.loads, **kwargs)
 
     @classmethod
-    def create_with_zlib_pickle(
+    def with_json(
         cls,
         **kwargs,
     ) -> MutableMapping:
-        import zlib, pickle
+        import json
 
-        return cls.create_with_buffers(zlib.compress, zlib.decompress, pickle.dumps, pickle.loads, **kwargs)
+        return cls.create_with_buffers(json.dumps, json.loads, **kwargs)
+
+    @classmethod
+    def with_json_zlib(
+        cls,
+        **kwargs,
+    ) -> MutableMapping:
+        import json, zlib
+
+        return cls.create_with_buffers(json.dumps, json.loads, zlib.compress, zlib.decompress, **kwargs)
