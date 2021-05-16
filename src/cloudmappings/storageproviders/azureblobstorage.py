@@ -4,6 +4,7 @@ import json
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError
 from azure.storage.blob import ContainerClient
+from azure.identity import DefaultAzureCredential
 
 from .storageprovider import StorageProvider
 
@@ -13,7 +14,7 @@ class AzureBlobStorageProvider(StorageProvider):
         self,
         account_url: str,
         container_name: str,
-        credential=None,
+        credential=DefaultAzureCredential(),
         create_container_metadata=None,
     ) -> None:
         self._container_client = ContainerClient(
