@@ -31,8 +31,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          echo "$GCP_CREDENTIALS_BASE64" > gcp_enc.txt
-          cat gcp.txt | base64 -d > gcp.json
+          echo $GCP_CREDENTIALS_BASE64 | base64 -d > gcp.json
           pytest \
             --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
             --gcp_project cloud-mappings-test \
