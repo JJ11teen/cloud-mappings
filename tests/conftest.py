@@ -1,20 +1,16 @@
-from ast import parse
+import logging
+
 from cloudmappings.storageproviders.azureblobstorage import AzureBlobStorageProvider
 from cloudmappings.storageproviders.googlecloudstorage import GoogleCloudStorageProvider
 from cloudmappings.storageproviders.awss3 import AWSS3Provider
-from cloudmappings.cloudstoragemapping import CloudStorageMapping
+from cloudmappings.cloudstoragemapping import CloudMapping
 
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--azure_account_url_with_sas",
+        "--azure_account_url",
         action="store",
-        help="Azure Account URL signed with SAS",
-    )
-    parser.addoption(
-        "--azure_container_name",
-        action="store",
-        help="Azure Container Name",
+        help="Azure Storage Account URL",
     )
     parser.addoption(
         "--gcp_project",
@@ -22,51 +18,54 @@ def pytest_addoption(parser):
         help="GCP Project Id",
     )
     parser.addoption(
-        "--gcp_bucket_name",
-        action="store",
-        help="GCP Bucket Name",
+        "--aws",
+        action="store_true",
+        help="Run AWS Tests",
     )
     parser.addoption(
-        "--aws_bucket_name",
+        "--test_container_id",
         action="store",
-        help="AWS Bucket Name",
+        required=True,
+        help="Suffix to add to container resources used for this test run. Use commit hash in cicd",
     )
 
 
 storage_providers = []
 cloud_mappings = []
+cloud_mapping_dupes = []
 
 
 def pytest_configure(config):
-    azure_account_url = config.getoption("azure_account_url_with_sas")
-    azure_container_name = config.getoption("azure_container_name")
-    if azure_account_url is not None or azure_container_name is not None:
+    test_container_name = f"pytest-{config.getoption('test_container_id')}"
+    logging.info(f"Using cloud containers with the name: {test_container_name}")
+
+    azure_account_url = config.getoption("azure_account_url")
+    if azure_account_url is not None:
         storage_providers.append(
             AzureBlobStorageProvider(
                 account_url=azure_account_url,
-                container_name=azure_container_name,
+                container_name=test_container_name,
             )
         )
 
     gcp_project = config.getoption("gcp_project")
-    gcp_bucket_name = config.getoption("gcp_bucket_name")
-    if gcp_project is not None or gcp_bucket_name is not None:
+    if gcp_project is not None:
         storage_providers.append(
             GoogleCloudStorageProvider(
                 project=gcp_project,
-                bucket_name=gcp_bucket_name,
+                bucket_name=test_container_name,
             )
         )
 
-    aws_bucket_name = config.getoption("aws_bucket_name")
-    if aws_bucket_name is not None:
+    if config.getoption("aws"):
         storage_providers.append(
             AWSS3Provider(
-                bucket_name=aws_bucket_name,
+                bucket_name=test_container_name,
             )
         )
 
-    cloud_mappings.extend([CloudStorageMapping(storageprovider=provider) for provider in storage_providers])
+    cloud_mappings.extend([CloudMapping(storageprovider=p) for p in storage_providers])
+    cloud_mapping_dupes.extend([CloudMapping(storageprovider=p) for p in storage_providers])
 
 
 def pytest_generate_tests(metafunc):
@@ -78,8 +77,15 @@ def pytest_generate_tests(metafunc):
         )
 
     if "cloud_mapping" in metafunc.fixturenames:
-        metafunc.parametrize(
-            "cloud_mapping",
-            cloud_mappings,
-            scope="session",
-        )
+        if "cloud_mapping_dupe" in metafunc.fixturenames:
+            metafunc.parametrize(
+                ["cloud_mapping", "cloud_mapping_dupe"],
+                zip(cloud_mappings, cloud_mapping_dupes),
+                scope="session",
+            )
+        else:
+            metafunc.parametrize(
+                "cloud_mapping",
+                cloud_mappings,
+                scope="session",
+            )

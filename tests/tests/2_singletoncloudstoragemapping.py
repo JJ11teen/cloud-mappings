@@ -1,7 +1,7 @@
 import pytest
 
 
-class EmptyCloudMappingTests:
+class SingletonCloudMappingTests:
     @pytest.fixture(autouse=True)
     def run_before_and_after_tests(self, cloud_mapping):
         for k in list(cloud_mapping.keys()):
