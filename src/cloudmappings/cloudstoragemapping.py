@@ -20,10 +20,11 @@ class CloudMapping(MutableMapping):
     def __init__(
         self,
         storageprovider: StorageProvider,
+        sync_initially: bool = True,
     ) -> None:
         self._storageprovider = storageprovider
         self.etags = {}
-        if self._storageprovider.create_if_not_exists():
+        if self._storageprovider.create_if_not_exists() and sync_initially:
             self.sync_with_cloud()
 
     def sync_with_cloud(self, key: str = None) -> None:
