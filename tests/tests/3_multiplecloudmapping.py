@@ -25,7 +25,7 @@ class ConcurrentCloudMappingTests:
         sess_3 = CloudMapping(storageprovider=storage_provider)
         # Session 1 updates the key:
         sess_1[key] = b"session_1"
-        # Session 3 is knows the key exists, so KeySyncError on get, set and delete:
+        # Session 3 knows the key exists, but is out of sync so KeySyncError on get, set and delete:
         with pytest.raises(KeySyncError):
             sess_3[key]
         with pytest.raises(KeySyncError):

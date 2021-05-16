@@ -61,3 +61,11 @@ class StorageProviderTests:
             storage_provider.upload_data(key, "bad-etag", b"data")
         with pytest.raises(KeySyncError):
             storage_provider.delete_data(key, "bad-etag")
+
+    def test_etags_change_with_same_data(self, storage_provider: StorageProvider, test_id: str):
+        key = test_id + "etags-unique-same-data-test"
+
+        first_etag = storage_provider.upload_data(key, None, b"static-data")
+        second_etag = storage_provider.upload_data(key, first_etag, b"static-data")
+
+        assert first_etag != second_etag
