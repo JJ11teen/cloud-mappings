@@ -10,8 +10,8 @@ class GoogleCloudStorageProvider(StorageProvider):
     def __init__(
         self,
         project: str,
-        credentials,
         bucket_name: str,
+        credentials=None,
     ) -> None:
         self._client = storage.Client(
             project=project,
@@ -28,7 +28,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             f"BucketName={self._bucket.name}"
         )
 
-    def create_if_not_exists(self, metadata: Dict[str, str]):
+    def create_if_not_exists(self):
         exists = False
         try:
             self._client.create_bucket(

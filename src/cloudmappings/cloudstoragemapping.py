@@ -14,7 +14,7 @@ def _unsafe_key(key: str) -> str:
     return unquote(key)
 
 
-class CloudStorageMapping(MutableMapping):
+class CloudMapping(MutableMapping):
     etags: Dict[str, str]
 
     def __init__(
