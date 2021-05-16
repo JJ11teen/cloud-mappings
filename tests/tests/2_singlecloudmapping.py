@@ -39,6 +39,16 @@ class SingleCloudMappingTests:
         with pytest.raises(ValueError, match="must be bytes like"):
             cm[key] = {"or": "something more", "elaborate": True}
 
+    def test_no_key_errors(self, storage_provider: StorageProvider, test_id: str):
+        cm = CloudMapping(storageprovider=storage_provider)
+        key = test_id + "/no-key-errors-test"
+
+        with pytest.raises(KeyError):
+            cm[key]
+        with pytest.raises(KeyError):
+            del cm[key]
+        assert key not in cm
+
     def test_basic_setting_and_getting(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
 
