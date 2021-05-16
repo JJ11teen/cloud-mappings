@@ -1,10 +1,11 @@
 import pytest
 
-from cloudmappings.storageproviders.storageprovider import KeySyncError
+from cloudmappings.errors import KeySyncError
+from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
 class StorageProviderTests:
-    def test_create_if_not_exists(self, storage_provider):
+    def test_create_if_not_exists(self, storage_provider: StorageProvider):
         # The pytest arg "test_container_id",
         # combined with the this being the first test run for each provider,
         # ensures that initally storage does not exist.
@@ -12,7 +13,7 @@ class StorageProviderTests:
         assert storage_provider.create_if_not_exists() == False
         assert storage_provider.create_if_not_exists() == True
 
-    def test_data_is_stored(self, storage_provider, test_id):
+    def test_data_is_stored(self, storage_provider: StorageProvider, test_id: str):
         key = test_id + "-data-store-test"
 
         etag = storage_provider.upload_data(key, None, b"data")
@@ -20,7 +21,7 @@ class StorageProviderTests:
 
         assert data == b"data"
 
-    def test_keys_and_etags_are_listed(self, storage_provider, test_id):
+    def test_keys_and_etags_are_listed(self, storage_provider: StorageProvider, test_id: str):
         key_1 = test_id + "-keys-and-etags-list-test-1"
         key_2 = test_id + "-keys-and-etags-list-test-2"
 
@@ -36,7 +37,7 @@ class StorageProviderTests:
         for key, etag in keys_and_etags.items():
             assert etag is not None, (key, etag)
 
-    def test_keys_are_deleted(self, storage_provider, test_id):
+    def test_keys_are_deleted(self, storage_provider: StorageProvider, test_id: str):
         key = test_id + "-keys-deleted-test"
 
         etag = storage_provider.upload_data(key, None, b"data")
@@ -45,7 +46,7 @@ class StorageProviderTests:
         cloud_key_list = storage_provider.list_keys_and_etags(key)
         assert key not in cloud_key_list
 
-    def test_etags_are_enforced(self, storage_provider, test_id):
+    def test_etags_are_enforced(self, storage_provider: StorageProvider, test_id: str):
         key = test_id + "etags-enforced-test"
 
         with pytest.raises(KeySyncError):

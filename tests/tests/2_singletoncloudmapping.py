@@ -1,13 +1,15 @@
 import pytest
 
 from cloudmappings.cloudstoragemapping import CloudMapping
+from cloudmappings.errors import KeySyncError
+from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
 class SingletonCloudMappingTests:
-    def test_initialising_mapping(self, storage_provider):
+    def test_initialising_mapping(self, storage_provider: StorageProvider):
         cm = CloudMapping(storageprovider=storage_provider)
 
-    def test_repr(self, storage_provider):
+    def test_repr(self, storage_provider: StorageProvider):
         cm = CloudMapping(storageprovider=storage_provider)
 
         _repr = str(cm)
@@ -23,7 +25,22 @@ class SingletonCloudMappingTests:
         elif "AWS" in _repr:
             assert "BucketName=" in _repr
 
-    def test_basic_setting_and_getting(self, storage_provider, test_id):
+    def test_non_byte_values_error(self, storage_provider: StorageProvider, test_id: str):
+        cm = CloudMapping(storageprovider=storage_provider)
+        key = test_id["non-bytes-error"]
+
+        with pytest.raises(ValueError, match="must be bytes like"):
+            cm[key] = True
+        with pytest.raises(ValueError, match="must be bytes like"):
+            cm[key] = 10
+        with pytest.raises(ValueError, match="must be bytes like"):
+            cm[key] = "string-data"
+        with pytest.raises(ValueError, match="must be bytes like"):
+            cm[key] = [0, 1, 0, 1]
+        with pytest.raises(ValueError, match="must be bytes like"):
+            cm[key] = {"or": "something more", "elaborate": True}
+
+    def test_basic_setting_and_getting(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
 
         cm[test_id + "-key-A"] = b"100"
@@ -34,7 +51,7 @@ class SingletonCloudMappingTests:
         assert cm[test_id + "-key-a"] == b"uncapitalised"
         assert cm[test_id + "-key-3"] == b"three"
 
-    def test_complex_keys(self, storage_provider, test_id):
+    def test_complex_keys(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
 
         cm[test_id + "/here/are/some/sub/dirs"] = b"0"
@@ -43,7 +60,7 @@ class SingletonCloudMappingTests:
         assert cm[test_id + "/here/are/some/sub/dirs"] == b"0"
         assert cm[test_id + "/howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
 
-    def test_deleting_keys(self, storage_provider, test_id):
+    def test_deleting_keys(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
         key = test_id + "/delete-test"
 
@@ -52,7 +69,7 @@ class SingletonCloudMappingTests:
         with pytest.raises(KeyError):
             cm[key]
 
-    def test_contains(self, storage_provider, test_id):
+    def test_contains(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
         key = test_id + "/contains-test"
 
@@ -61,7 +78,7 @@ class SingletonCloudMappingTests:
         cm[key] = b"0"
         assert key in cm
 
-    def test_length(self, storage_provider, test_id):
+    def test_length(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
         key_1 = test_id + "/length-test/1"
         key_2 = test_id + "/length-test/2"
