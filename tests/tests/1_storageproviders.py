@@ -33,6 +33,9 @@ class StorageProviderTests:
         assert etag_1 == keys_and_etags[key_1]
         assert etag_2 == keys_and_etags[key_2]
 
+        for key, etag in keys_and_etags.items():
+            assert etag is not None, (key, etag)
+
     def test_keys_are_deleted(self, storage_provider, test_id):
         key = test_id + "-keys-deleted-test"
 
@@ -48,7 +51,9 @@ class StorageProviderTests:
         with pytest.raises(KeySyncError):
             storage_provider.upload_data(key, "etag-when-none-existing", b"data")
 
-        storage_provider.upload_data(key, None, b"0")
+        good_etag = storage_provider.upload_data(key, None, b"0")
+        assert good_etag is not None
+
         with pytest.raises(KeySyncError):
             storage_provider.download_data(key, "bad-etag")
         with pytest.raises(KeySyncError):

@@ -52,7 +52,8 @@ class GoogleCloudStorageProvider(StorageProvider):
         b = self._bucket.get_blob(
             blob_name=key,
         )
-        if b is not None and (etag is None or etag != b.md5_hash):
+        existing_etag = None if b is None else b.md5_hash
+        if etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)
         if b is None:
             b = self._bucket.blob(
@@ -62,7 +63,6 @@ class GoogleCloudStorageProvider(StorageProvider):
             data=data,
             if_generation_match=b.generation,
         )
-        assert b.md5_hash is not None
         return b.md5_hash
 
     def delete_data(self, key: str, etag: str) -> None:
@@ -84,6 +84,4 @@ class GoogleCloudStorageProvider(StorageProvider):
                 prefix=key_prefix,
             )
         }
-        for md5 in keys_and_ids.values():
-            assert md5 is not None
         return keys_and_ids

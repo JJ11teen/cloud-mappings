@@ -38,8 +38,8 @@ test_run_id = str(uuid4())
 
 def pytest_configure(config):
     test_container_name = f"pytest-{config.getoption('test_container_id')}"
-    logging.info(f"Using cloud containers with the name: {test_container_name}")
-    logging.info(f"Using keys with the prefix: {test_run_id}")
+    logging.warning(f"Using cloud containers with the name: {test_container_name}")
+    logging.warning(f"Using keys with the prefix: {test_run_id}")
 
     azure_storage_account_url = config.getoption("azure_storage_account_url")
     if azure_storage_account_url is not None:
