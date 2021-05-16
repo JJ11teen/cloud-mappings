@@ -1,52 +1,64 @@
 import pytest
 
+from cloudmappings.cloudstoragemapping import CloudMapping
+
 
 class SingletonCloudMappingTests:
-    @pytest.fixture(autouse=True)
-    def run_before_and_after_tests(self, cloud_mapping):
-        for k in list(cloud_mapping.keys()):
-            del cloud_mapping[k]
+    def test_initialising_mapping(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
 
-    def test_basic_setting_and_getting(self, cloud_mapping):
-        cloud_mapping["key-A"] = b"100"
-        cloud_mapping["key-a"] = b"uncapitalised"
-        cloud_mapping["key-3"] = b"three"
+    def test_basic_setting_and_getting(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
 
-        assert cloud_mapping["key-A"] == b"100"
-        assert cloud_mapping["key-a"] == b"uncapitalised"
-        assert cloud_mapping["key-3"] == b"three"
+        cm["key-A"] = b"100"
+        cm["key-a"] = b"uncapitalised"
+        cm["key-3"] = b"three"
 
-    def test_complex_keys(self, cloud_mapping):
-        cloud_mapping["here/are/some/sub/dirs"] = b"0"
-        cloud_mapping["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
+        assert cm["key-A"] == b"100"
+        assert cm["key-a"] == b"uncapitalised"
+        assert cm["key-3"] == b"three"
 
-        assert cloud_mapping["here/are/some/sub/dirs"] == b"0"
-        assert cloud_mapping["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
+    def test_complex_keys(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
 
-    def test_deleting_keys(self, cloud_mapping):
-        cloud_mapping["1"] = b"0"
-        del cloud_mapping["1"]
+        cm["here/are/some/sub/dirs"] = b"0"
+        cm["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
+
+        assert cm["here/are/some/sub/dirs"] == b"0"
+        assert cm["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
+
+    def test_deleting_keys(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
+
+        cm["1"] = b"0"
+        del cm["1"]
         with pytest.raises(KeyError):
-            cloud_mapping["1"]
+            cm["1"]
 
-    def test_contains(self, cloud_mapping):
-        assert "1" not in cloud_mapping
+    def test_contains(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
 
-        cloud_mapping["1"] = b"1"
-        assert "1" in cloud_mapping
+        assert "1" not in cm
 
-    def test_length(self, cloud_mapping):
-        assert len(cloud_mapping) == 0
+        cm["1"] = b"1"
+        assert "1" in cm
 
-        cloud_mapping["a"] = b"100"
-        cloud_mapping["b"] = b"uncapitalised"
-        assert len(cloud_mapping) == 2
+    def test_length(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
 
-        cloud_mapping["c"] = b"three"
-        assert len(cloud_mapping) == 3
+        assert len(cm) == 0
 
-    def test_repr(self, cloud_mapping):
-        _repr = str(cloud_mapping)
+        cm["a"] = b"100"
+        cm["b"] = b"uncapitalised"
+        assert len(cm) == 2
+
+        cm["c"] = b"three"
+        assert len(cm) == 3
+
+    def test_repr(self, storage_provider):
+        cm = CloudMapping(storageprovider=storage_provider)
+
+        _repr = str(cm)
 
         assert "CloudStorageProvider=" in _repr
 

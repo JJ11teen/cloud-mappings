@@ -8,7 +8,7 @@ from cloudmappings.cloudstoragemapping import CloudMapping
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--azure_account_url",
+        "--azure_storage_account_url",
         action="store",
         help="Azure Storage Account URL",
     )
@@ -30,62 +30,38 @@ def pytest_addoption(parser):
     )
 
 
-storage_providers = []
-cloud_mappings = []
-cloud_mapping_dupes = []
+storage_providers = {}
 
 
 def pytest_configure(config):
     test_container_name = f"pytest-{config.getoption('test_container_id')}"
     logging.info(f"Using cloud containers with the name: {test_container_name}")
 
-    azure_account_url = config.getoption("azure_account_url")
-    if azure_account_url is not None:
-        storage_providers.append(
-            AzureBlobStorageProvider(
-                account_url=azure_account_url,
-                container_name=test_container_name,
-            )
+    azure_storage_account_url = config.getoption("azure_storage_account_url")
+    if azure_storage_account_url is not None:
+        storage_providers["azure"] = AzureBlobStorageProvider(
+            account_url=azure_storage_account_url,
+            container_name=test_container_name,
         )
 
     gcp_project = config.getoption("gcp_project")
     if gcp_project is not None:
-        storage_providers.append(
-            GoogleCloudStorageProvider(
-                project=gcp_project,
-                bucket_name=test_container_name,
-            )
+        storage_providers["gcp"] = GoogleCloudStorageProvider(
+            project=gcp_project,
+            bucket_name=test_container_name,
         )
 
     if config.getoption("aws"):
-        storage_providers.append(
-            AWSS3Provider(
-                bucket_name=test_container_name,
-            )
+        storage_providers["aws"] = AWSS3Provider(
+            bucket_name=test_container_name,
         )
-
-    cloud_mappings.extend([CloudMapping(storageprovider=p) for p in storage_providers])
-    cloud_mapping_dupes.extend([CloudMapping(storageprovider=p) for p in storage_providers])
 
 
 def pytest_generate_tests(metafunc):
     if "storage_provider" in metafunc.fixturenames:
         metafunc.parametrize(
             "storage_provider",
-            storage_providers,
+            storage_providers.values(),
+            ids=storage_providers.keys(),
             scope="session",
         )
-
-    if "cloud_mapping" in metafunc.fixturenames:
-        if "cloud_mapping_dupe" in metafunc.fixturenames:
-            metafunc.parametrize(
-                ["cloud_mapping", "cloud_mapping_dupe"],
-                zip(cloud_mappings, cloud_mapping_dupes),
-                scope="session",
-            )
-        else:
-            metafunc.parametrize(
-                "cloud_mapping",
-                cloud_mappings,
-                scope="session",
-            )
