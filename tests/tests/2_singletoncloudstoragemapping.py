@@ -7,54 +7,6 @@ class SingletonCloudMappingTests:
     def test_initialising_mapping(self, storage_provider):
         cm = CloudMapping(storageprovider=storage_provider)
 
-    def test_basic_setting_and_getting(self, storage_provider):
-        cm = CloudMapping(storageprovider=storage_provider)
-
-        cm["key-A"] = b"100"
-        cm["key-a"] = b"uncapitalised"
-        cm["key-3"] = b"three"
-
-        assert cm["key-A"] == b"100"
-        assert cm["key-a"] == b"uncapitalised"
-        assert cm["key-3"] == b"three"
-
-    def test_complex_keys(self, storage_provider):
-        cm = CloudMapping(storageprovider=storage_provider)
-
-        cm["here/are/some/sub/dirs"] = b"0"
-        cm["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
-
-        assert cm["here/are/some/sub/dirs"] == b"0"
-        assert cm["howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
-
-    def test_deleting_keys(self, storage_provider):
-        cm = CloudMapping(storageprovider=storage_provider)
-
-        cm["1"] = b"0"
-        del cm["1"]
-        with pytest.raises(KeyError):
-            cm["1"]
-
-    def test_contains(self, storage_provider):
-        cm = CloudMapping(storageprovider=storage_provider)
-
-        assert "1" not in cm
-
-        cm["1"] = b"1"
-        assert "1" in cm
-
-    def test_length(self, storage_provider):
-        cm = CloudMapping(storageprovider=storage_provider)
-
-        assert len(cm) == 0
-
-        cm["a"] = b"100"
-        cm["b"] = b"uncapitalised"
-        assert len(cm) == 2
-
-        cm["c"] = b"three"
-        assert len(cm) == 3
-
     def test_repr(self, storage_provider):
         cm = CloudMapping(storageprovider=storage_provider)
 
@@ -70,3 +22,56 @@ class SingletonCloudMappingTests:
             assert "BucketName=" in _repr
         elif "AWS" in _repr:
             assert "BucketName=" in _repr
+
+    def test_basic_setting_and_getting(self, storage_provider, test_id):
+        cm = CloudMapping(storageprovider=storage_provider)
+
+        cm[test_id + "-key-A"] = b"100"
+        cm[test_id + "-key-a"] = b"uncapitalised"
+        cm[test_id + "-key-3"] = b"three"
+
+        assert cm[test_id + "-key-A"] == b"100"
+        assert cm[test_id + "-key-a"] == b"uncapitalised"
+        assert cm[test_id + "-key-3"] == b"three"
+
+    def test_complex_keys(self, storage_provider, test_id):
+        cm = CloudMapping(storageprovider=storage_provider)
+
+        cm[test_id + "/here/are/some/sub/dirs"] = b"0"
+        cm[test_id + "/howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
+
+        assert cm[test_id + "/here/are/some/sub/dirs"] == b"0"
+        assert cm[test_id + "/howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
+
+    def test_deleting_keys(self, storage_provider, test_id):
+        cm = CloudMapping(storageprovider=storage_provider)
+        key = test_id + "/delete-test"
+
+        cm[key] = b"0"
+        del cm[key]
+        with pytest.raises(KeyError):
+            cm[key]
+
+    def test_contains(self, storage_provider, test_id):
+        cm = CloudMapping(storageprovider=storage_provider)
+        key = test_id + "/contains-test"
+
+        assert key not in cm
+
+        cm[key] = b"0"
+        assert key in cm
+
+    def test_length(self, storage_provider, test_id):
+        cm = CloudMapping(storageprovider=storage_provider)
+        key_1 = test_id + "/length-test/1"
+        key_2 = test_id + "/length-test/2"
+        key_3 = test_id + "/length-test/3"
+
+        starting_length = len(cm)
+
+        cm[key_1] = b"a"
+        cm[key_2] = b"b"
+        assert len(cm) == starting_length + 2
+
+        cm[key_3] = b"c"
+        assert len(cm) == starting_length + 3

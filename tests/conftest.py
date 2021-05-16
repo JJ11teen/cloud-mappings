@@ -1,9 +1,11 @@
+from uuid import uuid4
 import logging
+
+import pytest
 
 from cloudmappings.storageproviders.azureblobstorage import AzureBlobStorageProvider
 from cloudmappings.storageproviders.googlecloudstorage import GoogleCloudStorageProvider
 from cloudmappings.storageproviders.awss3 import AWSS3Provider
-from cloudmappings.cloudstoragemapping import CloudMapping
 
 
 def pytest_addoption(parser):
@@ -31,11 +33,13 @@ def pytest_addoption(parser):
 
 
 storage_providers = {}
+test_run_id = str(uuid4())
 
 
 def pytest_configure(config):
     test_container_name = f"pytest-{config.getoption('test_container_id')}"
     logging.info(f"Using cloud containers with the name: {test_container_name}")
+    logging.info(f"Using keys with the prefix: {test_run_id}")
 
     azure_storage_account_url = config.getoption("azure_storage_account_url")
     if azure_storage_account_url is not None:
@@ -65,3 +69,8 @@ def pytest_generate_tests(metafunc):
             ids=storage_providers.keys(),
             scope="session",
         )
+
+
+@pytest.fixture
+def test_id():
+    return test_run_id
