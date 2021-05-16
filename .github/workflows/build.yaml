@@ -3,6 +3,7 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: lucas_env
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
@@ -22,4 +23,8 @@ jobs:
           pip install .[tests,azure,gcp,aws]
       - name: Test with black and pytest
         run: |
-          pytest
+          pytest \
+            --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
+            --gcp_project cloud-mappings-test \
+            --aws \
+            --test_container_id ${GITHUB_SHA::6}
