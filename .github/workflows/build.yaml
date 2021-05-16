@@ -22,7 +22,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install .[tests,azure,gcp,aws]
       - name: Test with black and pytest
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          GOOGLE_APPLICATION_CREDENTIALS: gcp.json
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
+          echo "$GCP_CREDENTIALS" > gcp.json
           pytest \
             --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
             --gcp_project cloud-mappings-test \
