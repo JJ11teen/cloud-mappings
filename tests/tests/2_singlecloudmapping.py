@@ -26,7 +26,7 @@ class SingleCloudMappingTests:
 
     def test_non_byte_values_error(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storageprovider=storage_provider)
-        key = test_id["non-bytes-error"]
+        key = test_id + "non-bytes-error"
 
         with pytest.raises(ValueError, match="must be bytes like"):
             cm[key] = True
