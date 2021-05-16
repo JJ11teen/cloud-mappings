@@ -2,6 +2,7 @@ from typing import Dict
 
 from google.cloud import storage
 from google.cloud.exceptions import Conflict
+from google.cloud.storage.blob import Blob
 
 from .storageprovider import StorageProvider
 
@@ -38,11 +39,17 @@ class GoogleCloudStorageProvider(StorageProvider):
             exists = True
         return exists
 
+    def _parse_etag(self, blob: Blob) -> str:
+        if blob is None:
+            return None
+        return f"{blob.generation}{blob.metageneration}"
+
     def download_data(self, key: str, etag: str) -> bytes:
         b = self._bucket.get_blob(
             blob_name=key,
         )
-        if etag is not None and (b is None or etag != b.md5_hash):
+        existing_etag = self._parse_etag(b)
+        if etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)
         return b.download_as_bytes(
             if_generation_match=b.generation,
@@ -52,7 +59,7 @@ class GoogleCloudStorageProvider(StorageProvider):
         b = self._bucket.get_blob(
             blob_name=key,
         )
-        existing_etag = None if b is None else b.md5_hash
+        existing_etag = self._parse_etag(b)
         if etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)
         if b is None:
@@ -63,13 +70,14 @@ class GoogleCloudStorageProvider(StorageProvider):
             data=data,
             if_generation_match=b.generation,
         )
-        return b.md5_hash
+        return f"{b.generation}{b.metageneration}"
 
     def delete_data(self, key: str, etag: str) -> None:
         b = self._bucket.get_blob(
             blob_name=key,
         )
-        if b is None or etag != b.md5_hash:
+        existing_etag = self._parse_etag(b)
+        if etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)
         self._bucket.delete_blob(
             blob_name=key,
@@ -78,7 +86,7 @@ class GoogleCloudStorageProvider(StorageProvider):
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         keys_and_ids = {
-            b.name: b.md5_hash
+            b.name: self._parse_etag(b)
             for b in self._client.list_blobs(
                 bucket_or_name=self._bucket,
                 prefix=key_prefix,
