@@ -20,10 +20,10 @@ class AWSS3Provider(StorageProvider):
         self._bucket_name = bucket_name
         if not silence_warning:
             logging.warning(
-                (
-                    "AWS S3 does not support server-side atomic requests, it is not recommended for concurrent use.",
-                    "Consider using another provider such as Azure or GCP if you need concurrent access.",
-                    "You may silence this warning with silence_warning=True",
+                str(
+                    "AWS S3 does not support server-side atomic requests, it is not recommended for concurrent use.\n",
+                    "Consider using another provider such as Azure or GCP if you need concurrent access.\n",
+                    "You may silence this warning with silence_warning=True.",
                 )
             )
 
