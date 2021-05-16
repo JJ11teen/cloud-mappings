@@ -5,8 +5,11 @@ from cloudmappings.storageproviders.storageprovider import KeySyncError
 
 class StorageProviderTests:
     def test_create_if_not_exists(self, storage_provider):
-        # TODO: Ensure initally storage does not exist:
-        # assert storage_provider.create_if_not_exists() == False
+        # The pytest arg "test_container_id",
+        # combined with the this being the first test run for each provider,
+        # ensures that initally storage does not exist,
+        # So we expect False for the first call and True for the second:
+        assert storage_provider.create_if_not_exists() == False
         assert storage_provider.create_if_not_exists() == True
 
     def test_data_is_stored(self, storage_provider):
