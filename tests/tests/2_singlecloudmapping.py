@@ -1,11 +1,10 @@
 import pytest
 
 from cloudmappings.cloudstoragemapping import CloudMapping
-from cloudmappings.errors import KeySyncError
 from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
-class SingletonCloudMappingTests:
+class SingleCloudMappingTests:
     def test_initialising_mapping(self, storage_provider: StorageProvider):
         cm = CloudMapping(storageprovider=storage_provider)
 
