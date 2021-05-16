@@ -62,6 +62,8 @@ class AzureBlobStorageProvider(StorageProvider):
             )
         except ResourceModifiedError:
             self.raise_key_sync_error(key=key, etag=etag)
+        except ResourceExistsError:
+            self.raise_key_sync_error(key=key, etag=etag)
         return json.loads(response["etag"])
 
     def delete_data(self, key: str, etag: str) -> None:
