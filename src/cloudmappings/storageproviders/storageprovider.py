@@ -1,31 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-
-class KeySyncError(ValueError):
-    def __init__(self, cloudprovider: "StorageProvider", key: str, etag: str) -> None:
-        super().__init__(
-            f"Mapping is out of sync with cloud data.\n"
-            f"Cloud storage: '{cloudprovider.safe_name()}'\n"
-            f"Key: '{key}', etag: '{etag}'"
-        )
-
-
-class ValueSizeError(ValueError):
-    def __init__(self, cloudprovider: "StorageProvider", key: str, size: int) -> None:
-        super().__init__(
-            f"Value is too big to fit in cloud."
-            f"Cloud storage: '{cloudprovider.safe_name()}'\n"
-            f"Key: '{key}', size: '{size}'"
-        )
+from ..errors import KeySyncError, ValueSizeError
 
 
 class StorageProvider(ABC):
     def raise_key_sync_error(self, key: str, etag: str):
-        raise KeySyncError(cloudprovider=self, key=key, etag=etag)
+        raise KeySyncError(storageprovider_safe_name=self.safe_name(), key=key, etag=etag)
 
     def raise_value_size_error(self, key: str, size: int):
-        raise ValueSizeError(cloudprovider=self, key=key, size=size)
+        raise ValueSizeError(storageprovider_safe_name=self.safe_name(), key=key, size=size)
 
     @abstractmethod
     def safe_name(self) -> str:
