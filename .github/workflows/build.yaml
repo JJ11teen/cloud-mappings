@@ -30,10 +30,11 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: gcp.json
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          PYTHON_MATRIX_VERSION: ${{ matrix.python-version }}
         run: |
           echo $GCP_CREDENTIALS_BASE64 | base64 -d > gcp.json
           pytest \
             --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
             --gcp_project cloud-mappings-test \
             --aws \
-            --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version }}"
+            --test_container_id "${GITHUB_SHA::8}-${PYTHON_MATRIX_VERSION}"
