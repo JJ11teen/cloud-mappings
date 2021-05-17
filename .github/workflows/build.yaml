@@ -36,4 +36,4 @@ jobs:
             --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
             --gcp_project cloud-mappings-test \
             --aws \
-            --test_container_id ${GITHUB_SHA::6}
+            --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version }}"
