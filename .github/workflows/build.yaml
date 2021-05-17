@@ -6,10 +6,16 @@ jobs:
     environment: lucas_env
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+       include:
+        - python-version: 3.7
+          python-version-str: "py-37"
+        - python-version: 3.8
+          python-version-str: "py-38"
+        - python-version: 3.9
+          python-version-str: "py-39"
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up ${{ matrix.python-version-str }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -36,4 +42,4 @@ jobs:
             --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
             --gcp_project cloud-mappings-test \
             --aws \
-            --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version }}"
+            --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version-str }}"
