@@ -69,8 +69,8 @@ Each `cloud-mapping` keeps an internal dict of [etags](https://en.wikipedia.org/
 
 ### Serialisation
 
-If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `cloud-mapping` class, you will get a "raw" `cloud-mapping` which only accepts byte-likes as values. You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_buffers([dumps_1, loads_1, dumps_2, loads_2, ...])` where `dumps` and `loads` are the ordered functions to serialise and deserialise your data respectively.
+If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `CloudMapping` class, you will get a "raw" `cloud-mapping` which accepts only byte-likes as values. Along with the `.with_pickle()` serialisation utility, `.with_json()` and `.with_json_zlib()` also exist.
 
-The following exist as common starting points: `.with_pickle()`, `.with_json()`, `.with_json_zlib()`.
+You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_buffers([dumps_1, dumps_2, ..., dumps_N], [loads_1, loads_2, ..., loads_N])`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
