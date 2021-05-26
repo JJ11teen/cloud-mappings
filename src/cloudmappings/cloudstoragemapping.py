@@ -1,18 +1,7 @@
 from functools import partial
 from typing import MutableMapping, Dict
-from urllib.parse import quote, unquote
 
 from .storageproviders.storageprovider import StorageProvider
-
-
-def _safe_key(key: str) -> str:
-    if not isinstance(key, str):
-        raise TypeError("Key must be of type 'str'. Got key:", key)
-    return quote(key)
-
-
-def _unsafe_key(key: str) -> str:
-    return unquote(key)
 
 
 class CloudMapping(MutableMapping):
@@ -20,18 +9,26 @@ class CloudMapping(MutableMapping):
 
     def __init__(
         self,
-        storageprovider: StorageProvider,
+        storage_provider: StorageProvider,
         sync_initially: bool = True,
     ) -> None:
-        self._storageprovider = storageprovider
+        self._storage_provider = storage_provider
         self._etags = {}
-        if self._storageprovider.create_if_not_exists() and sync_initially:
+        if self._storage_provider.create_if_not_exists() and sync_initially:
             self.sync_with_cloud()
 
+    def _encode_key(self, unsafe_key: str) -> str:
+        if not isinstance(unsafe_key, str):
+            raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
+        return self._storage_provider.encode_key(unsafe_key=unsafe_key)
+
     def sync_with_cloud(self, key: str = None) -> None:
-        prefix_key = _safe_key(key) if key is not None else None
+        prefix_key = self._encode_key(key) if key is not None else None
         self._etags.update(
-            {_unsafe_key(k): i for k, i in self._storageprovider.list_keys_and_etags(prefix_key).items()}
+            {
+                self._storage_provider.decode_key(k): i
+                for k, i in self._storage_provider.list_keys_and_etags(prefix_key).items()
+            }
         )
 
     @property
@@ -41,13 +38,13 @@ class CloudMapping(MutableMapping):
     def __getitem__(self, key: str) -> bytes:
         if key not in self._etags:
             raise KeyError(key)
-        return self._storageprovider.download_data(key=_safe_key(key), etag=self._etags[key])
+        return self._storage_provider.download_data(key=self._encode_key(key), etag=self._etags[key])
 
     def __setitem__(self, key: str, value: bytes) -> None:
         if not isinstance(value, bytes):
             raise ValueError("Value must be bytes like")
-        self._etags[key] = self._storageprovider.upload_data(
-            key=_safe_key(key),
+        self._etags[key] = self._storage_provider.upload_data(
+            key=self._encode_key(key),
             etag=self._etags.get(key, None),
             data=value,
         )
@@ -55,7 +52,7 @@ class CloudMapping(MutableMapping):
     def __delitem__(self, key: str) -> None:
         if key not in self._etags:
             raise KeyError(key)
-        self._storageprovider.delete_data(key=_safe_key(key), etag=self._etags[key])
+        self._storage_provider.delete_data(key=self._encode_key(key), etag=self._etags[key])
         del self._etags[key]
 
     def __contains__(self, key: str) -> bool:
@@ -70,7 +67,7 @@ class CloudMapping(MutableMapping):
         return len(self._etags)
 
     def __repr__(self) -> str:
-        return f"cloudmapping<{self._storageprovider.safe_name()}>"
+        return f"cloudmapping<{self._storage_provider.logical_name()}>"
 
     @classmethod
     def with_buffers(cls, input_buffers, output_buffers, *args, **kwargs) -> "CloudMapping":

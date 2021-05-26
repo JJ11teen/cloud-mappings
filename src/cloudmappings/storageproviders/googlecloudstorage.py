@@ -22,7 +22,7 @@ class GoogleCloudStorageProvider(StorageProvider):
             bucket_name=bucket_name,
         )
 
-    def safe_name(self) -> str:
+    def logical_name(self) -> str:
         return (
             "CloudStorageProvider=GoogleCloudStorage,"
             f"Project={self._client.project},"

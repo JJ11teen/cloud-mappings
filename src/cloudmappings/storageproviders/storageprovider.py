@@ -1,18 +1,25 @@
 from abc import ABC, abstractmethod
 from typing import Dict
+from urllib.parse import quote, unquote
 
 from ..errors import KeySyncError, ValueSizeError
 
 
 class StorageProvider(ABC):
     def raise_key_sync_error(self, key: str, etag: str):
-        raise KeySyncError(storageprovider_safe_name=self.safe_name(), key=key, etag=etag)
+        raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
 
     def raise_value_size_error(self, key: str, size: int):
-        raise ValueSizeError(storageprovider_safe_name=self.safe_name(), key=key, size=size)
+        raise ValueSizeError(storage_provider_name=self.logical_name(), key=key, size=size)
+
+    def encode_key(self, unsafe_key) -> str:
+        return quote(unsafe_key, errors="strict")
+
+    def decode_key(self, encoded_key) -> str:
+        return unquote(encoded_key, errors="strict")
 
     @abstractmethod
-    def safe_name(self) -> str:
+    def logical_name(self) -> str:
         """Returns a human readable string identifying the current implementation, and which logical cloud resouce it is currently mapping to. Does not include any credential information.
         :return: String with identity information
         """

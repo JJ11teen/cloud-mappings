@@ -24,7 +24,7 @@ class AzureBlobStorageProvider(StorageProvider):
         )
         self._create_container_metadata = create_container_metadata
 
-    def safe_name(self) -> str:
+    def logical_name(self) -> str:
         return (
             "CloudStorageProvider=AzureBlobStorage,"
             f"StorageAccountName={self._container_client.account_name},"
@@ -60,9 +60,7 @@ class AzureBlobStorageProvider(StorageProvider):
                 data=data,
                 **args,
             )
-        except ResourceModifiedError:
-            self.raise_key_sync_error(key=key, etag=etag)
-        except ResourceExistsError:
+        except (ResourceExistsError, ResourceModifiedError):
             self.raise_key_sync_error(key=key, etag=etag)
         return json.loads(response["etag"])
 

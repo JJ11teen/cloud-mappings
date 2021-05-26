@@ -6,29 +6,34 @@ from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 class SingleCloudMappingTests:
     def test_initialising_without_sync(self, storage_provider: StorageProvider):
-        CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        CloudMapping(storage_provider=storage_provider, sync_initially=False)
 
     def test_initialising_with_sync(self, storage_provider: StorageProvider):
-        CloudMapping(storageprovider=storage_provider, sync_initially=True)
+        CloudMapping(storage_provider=storage_provider, sync_initially=True)
 
     def test_repr(self, storage_provider: StorageProvider):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
 
         _repr = str(cm)
 
         assert "CloudStorageProvider=" in _repr
 
-        if "Azure" in _repr:
+        if "AzureBlob" in _repr:
             assert "StorageAccountName=" in _repr
             assert "ContainerName=" in _repr
-        elif "Google" in _repr:
+        elif "AzureTable" in _repr:
+            assert "StorageAccountName=" in _repr
+            assert "TableName=" in _repr
+        elif "GoogleCloudStorage" in _repr:
             assert "Project=" in _repr
             assert "BucketName=" in _repr
-        elif "AWS" in _repr:
+        elif "AWSS3" in _repr:
             assert "BucketName=" in _repr
+        else:
+            pytest.fail("Unknown provider repr")
 
     def test_non_byte_values_error(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "non-bytes-error"
 
         with pytest.raises(ValueError, match="must be bytes like"):
@@ -43,7 +48,7 @@ class SingleCloudMappingTests:
             cm[key] = {"or": "something more", "elaborate": True}
 
     def test_no_key_errors(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "/no-key-errors-test"
 
         with pytest.raises(KeyError):
@@ -53,7 +58,7 @@ class SingleCloudMappingTests:
         assert key not in cm
 
     def test_basic_setting_and_getting(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
 
         cm[test_id + "-key-A"] = b"100"
         cm[test_id + "-key-a"] = b"uncapitalised"
@@ -64,16 +69,18 @@ class SingleCloudMappingTests:
         assert cm[test_id + "-key-3"] == b"three"
 
     def test_complex_keys(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+        key1 = test_id + "/here/are/some/sub/dirs"
+        key2 = test_id + "/how.about_some ˆøœ¨åß∆∫ı˜unusual!@#$%^*characters"
 
-        cm[test_id + "/here/are/some/sub/dirs"] = b"0"
-        cm[test_id + "/howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] = b"1"
+        cm[key1] = b"0"
+        cm[key2] = b"1"
 
-        assert cm[test_id + "/here/are/some/sub/dirs"] == b"0"
-        assert cm[test_id + "/howaboutsome ˆøœ¨åß∆∫ı˜ unusual !@#$%^* characters"] == b"1"
+        assert cm[key1] == b"0"
+        assert cm[key2] == b"1"
 
     def test_deleting_keys(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "/delete-test"
 
         cm[key] = b"0"
@@ -82,7 +89,7 @@ class SingleCloudMappingTests:
             cm[key]
 
     def test_contains(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "/contains-test"
 
         assert key not in cm
@@ -91,7 +98,7 @@ class SingleCloudMappingTests:
         assert key in cm
 
     def test_length(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storageprovider=storage_provider, sync_initially=False)
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key_1 = test_id + "/length-test/1"
         key_2 = test_id + "/length-test/2"
         key_3 = test_id + "/length-test/3"
