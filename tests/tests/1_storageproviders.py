@@ -74,6 +74,9 @@ class StorageProviderTests:
         with pytest.raises(KeySyncError):
             storage_provider.upload_data(encoded_key, "bad-etag", b"data")
         with pytest.raises(KeySyncError):
+            # No etag, not expecting data to overwrite
+            storage_provider.upload_data(encoded_key, None, b"data")
+        with pytest.raises(KeySyncError):
             storage_provider.delete_data(encoded_key, "bad-etag")
 
     def test_etags_change_with_same_data(self, storage_provider: StorageProvider, test_id: str):
