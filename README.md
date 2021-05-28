@@ -4,7 +4,7 @@ MutableMapping implementations for common cloud storage providers
 [![Build](https://github.com/JJ11teen/cloud-mappings/actions/workflows/build.yaml/badge.svg)](https://github.com/JJ11teen/cloud-mappings/actions/workflows/build.yaml)
 [![PyPI version](https://badge.fury.io/py/cloud-mappings.svg)](https://pypi.org/project/cloud-mappings/)
 
-For now [Azure Blob Storage](https://azure.microsoft.com/en-au/services/storage/blobs), [Google Cloud Storage](https://cloud.google.com/storage/), and [AWS S3](https://aws.amazon.com/s3/) are implemented. Contributions of new providers are welcome.
+For now [Azure Blob Storage](https://azure.microsoft.com/en-au/services/storage/blobs), [Azure Table Storage](https://azure.microsoft.com/en-au/services/storage/tables), [Google Cloud Storage](https://cloud.google.com/storage/), and [AWS S3](https://aws.amazon.com/s3/) are implemented. Contributions of new providers are welcome.
 
 ## Installation
 
@@ -30,6 +30,17 @@ cm = AzureBlobMapping.with_pickle(
     credential=AZURE_CREDENTIAL_OBJECT,
 )
 ```
+
+### AzureTableMapping:
+```python
+from cloudmappings import AzureTableMapping
+
+cm = AzureTableMapping.with_pickle(
+    connection_string="AZURE_TABLE_CONNECTION_STRING",
+    table_name="TABLE_NAME",
+)
+```
+Note that Azure Table Storage has a 1MB size limit per entity.
 
 ### GoogleCloudStorageMapping:
 ```python
