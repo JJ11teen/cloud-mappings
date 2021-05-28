@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies, for extras and tests too
         run: |
           python -m pip install --upgrade pip
-          pip install .[tests,azure,gcp,aws]
+          pip install .[tests,azureblob,azuretable,gcpstorage,awss3]
       - name: Test with black and pytest
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -47,7 +47,8 @@ jobs:
         run: |
           echo $GCP_CREDENTIALS_BASE64 | base64 -d > gcp.json
           pytest \
-            --azure_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
-            --gcp_project cloud-mappings-test \
-            --aws \
+            --azure_blob_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
+            --azure_table \
+            --gcp_storage_project cloud-mappings-test \
+            --aws_s3 \
             --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version-str }}"
