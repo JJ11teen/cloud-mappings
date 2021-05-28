@@ -6,11 +6,11 @@ from ..errors import KeySyncError, ValueSizeError
 
 
 class StorageProvider(ABC):
-    def raise_key_sync_error(self, key: str, etag: str):
-        raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
+    def raise_key_sync_error(self, key: str, etag: str, inner_exception: Exception = None):
+        raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from inner_exception
 
-    def raise_value_size_error(self, key: str, size: int):
-        raise ValueSizeError(storage_provider_name=self.logical_name(), key=key, size=size)
+    def raise_value_size_error(self, key: str, inner_exception: Exception = None):
+        raise ValueSizeError(storage_provider_name=self.logical_name(), key=key) from inner_exception
 
     def encode_key(self, unsafe_key) -> str:
         return quote(unsafe_key, errors="strict")
