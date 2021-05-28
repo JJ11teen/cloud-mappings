@@ -14,13 +14,13 @@ jobs:
       matrix:
        include:
         - python-version: 3.6
-          python-version-str: "py-36"
+          python-version-str: "py36"
         - python-version: 3.7
-          python-version-str: "py-37"
+          python-version-str: "py37"
         - python-version: 3.8
-          python-version-str: "py-38"
+          python-version-str: "py38"
         - python-version: 3.9
-          python-version-str: "py-39"
+          python-version-str: "py39"
     steps:
       - uses: actions/checkout@v2
       - name: Set up ${{ matrix.python-version-str }}
@@ -52,4 +52,4 @@ jobs:
             --azure_table \
             --gcp_storage_project cloud-mappings-test \
             --aws_s3 \
-            --test_container_id "${GITHUB_SHA::8}-${{ matrix.python-version-str }}"
+            --test_container_id "${GITHUB_SHA::8}${{ matrix.python-version-str }}"
