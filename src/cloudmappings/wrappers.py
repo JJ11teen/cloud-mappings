@@ -8,6 +8,13 @@ class AzureBlobMapping(CloudMapping):
         super().__init__(storage_provider=AzureBlobStorageProvider(*args, **kwargs))
 
 
+class AzureTableMapping(CloudMapping):
+    def __init__(self, *args, **kwargs) -> None:
+        from .storageproviders.azuretablestorage import AzureTableStorageProvider
+
+        super().__init__(storage_provider=AzureTableStorageProvider(*args, **kwargs))
+
+
 class GoogleCloudStorageMapping(CloudMapping):
     def __init__(self, *args, **kwargs) -> None:
         from .storageproviders.googlecloudstorage import GoogleCloudStorageProvider
