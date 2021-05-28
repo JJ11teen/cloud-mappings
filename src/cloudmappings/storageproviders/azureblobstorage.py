@@ -24,7 +24,7 @@ class AzureBlobStorageProvider(StorageProvider):
         )
         self._create_container_metadata = create_container_metadata
 
-    def safe_name(self) -> str:
+    def logical_name(self) -> str:
         return (
             "CloudStorageProvider=AzureBlobStorage,"
             f"StorageAccountName={self._container_client.account_name},"
@@ -45,8 +45,8 @@ class AzureBlobStorageProvider(StorageProvider):
                 etag=etag,
                 match_condition=MatchConditions.IfNotModified if etag is not None else None,
             ).readall()
-        except ResourceModifiedError:
-            self.raise_key_sync_error(key=key, etag=etag)
+        except ResourceModifiedError as e:
+            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         expecting_blob = etag is not None
@@ -60,10 +60,8 @@ class AzureBlobStorageProvider(StorageProvider):
                 data=data,
                 **args,
             )
-        except ResourceModifiedError:
-            self.raise_key_sync_error(key=key, etag=etag)
-        except ResourceExistsError:
-            self.raise_key_sync_error(key=key, etag=etag)
+        except (ResourceExistsError, ResourceModifiedError) as e:
+            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
         return json.loads(response["etag"])
 
     def delete_data(self, key: str, etag: str) -> None:
@@ -73,8 +71,8 @@ class AzureBlobStorageProvider(StorageProvider):
                 etag=etag,
                 match_condition=MatchConditions.IfNotModified,
             )
-        except ResourceModifiedError:
-            self.raise_key_sync_error(key=key, etag=etag)
+        except ResourceModifiedError as e:
+            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         return {b.name: b.etag for b in self._container_client.list_blobs(name_starts_with=key_prefix)}

@@ -1,7 +1,8 @@
-from .wrappers import AzureBlobMapping, GoogleCloudStorageMapping, AWSS3Mapping
+from .wrappers import AzureBlobMapping, AzureTableMapping, GoogleCloudStorageMapping, AWSS3Mapping
 
 __all__ = [
     "AzureBlobMapping",
+    "AzureTableMapping",
     "GoogleCloudStorageMapping",
     "AWSS3Mapping",
 ]

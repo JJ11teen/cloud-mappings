@@ -27,7 +27,7 @@ class AWSS3Provider(StorageProvider):
                 ),
             )
 
-    def safe_name(self) -> str:
+    def logical_name(self) -> str:
         return "CloudStorageProvider=AWSS3," f"BucketName={self._bucket_name}"
 
     def create_if_not_exists(self):

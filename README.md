@@ -15,7 +15,7 @@ pip install cloud-mappings
 
 By default, `cloud-mappings` doesn't install any of the required storage providers dependencies. If you would like to install them alongside `cloud-mappings` you may run any combination of:
 ```
-pip install cloud-mappings[azure,gcp,aws]
+pip install cloud-mappings[azureblob,azuretable,gcpstorage,awss3]
 ```
 
 ## Instantiation
