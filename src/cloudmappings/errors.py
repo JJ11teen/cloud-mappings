@@ -10,5 +10,5 @@ class KeySyncError(ValueError):
 class ValueSizeError(ValueError):
     def __init__(self, storage_provider_name: str, key: str) -> None:
         super().__init__(
-            f"Value is too big to fit in cloud." f"Cloud storage: '{storage_provider_name}'\n" f"Key: '{key}'"
+            f"Value is too big to fit in cloud.\n" f"Cloud storage: '{storage_provider_name}'\n" f"Key: '{key}'"
         )
