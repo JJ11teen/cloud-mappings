@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.177.0/containers/python-3
 {
-	"name": "Cloud Mappings Development",
+	"name": "cloud-mappings Development",
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": "..",
