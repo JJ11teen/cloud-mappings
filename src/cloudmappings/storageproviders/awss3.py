@@ -71,9 +71,13 @@ class AWSS3Provider(StorageProvider):
         body, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if etag is not None and (body is None or etag != existing_etag):
             self.raise_key_sync_error(key=key, etag=etag)
+        if body is None:
+            return None
         return body.read()
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
+        if not isinstance(data, bytes):
+            raise ValueError("Data must be bytes like")
         _, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)

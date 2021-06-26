@@ -33,6 +33,27 @@ class ConcurrentCloudMappingTests:
         with pytest.raises(KeySyncError):
             del sess_3[key]
 
+    def test_blind_get(self, storage_provider: StorageProvider, test_id: str):
+        sess_1 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+        sess_2 = CloudMapping(storage_provider=storage_provider, sync_initially=False, get_blindly=True)
+        sess_3 = CloudMapping(storage_provider=storage_provider, sync_initially=False, get_blindly=False)
+        key = test_id + "/concurrent/blind-get-test"
+
+        # Session 1 uploads data:
+        sess_1[key] = b"data"
+
+        # Session 2 blindly gets by default, but can be turned off:
+        assert sess_2[key] == b"data"
+        sess_2.get_blindly = False
+        with pytest.raises(KeyError):
+            sess_2[key]
+
+        # Session 3 dones't blindly get by default, but can be set to:
+        with pytest.raises(KeyError):
+            sess_3[key]
+        sess_3.get_blindly = True
+        assert sess_3[key] == b"data"
+
     def test_manual_change_error(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "/concurrent/manual-change-test"

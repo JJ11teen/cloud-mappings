@@ -11,9 +11,11 @@ class CloudMapping(MutableMapping):
         self,
         storage_provider: StorageProvider,
         sync_initially: bool = True,
+        get_blindly: bool = False,
     ) -> None:
         self._storage_provider = storage_provider
         self._etags = {}
+        self.get_blindly = get_blindly
         if self._storage_provider.create_if_not_exists() and sync_initially:
             self.sync_with_cloud()
 
@@ -22,12 +24,12 @@ class CloudMapping(MutableMapping):
             raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
         return self._storage_provider.encode_key(unsafe_key=unsafe_key)
 
-    def sync_with_cloud(self, key: str = None) -> None:
-        prefix_key = self._encode_key(key) if key is not None else None
+    def sync_with_cloud(self, key_prefix: str = None) -> None:
+        key_prefix = None if key_prefix is None else self._encode_key(key_prefix)
         self._etags.update(
             {
                 self._storage_provider.decode_key(k): i
-                for k, i in self._storage_provider.list_keys_and_etags(prefix_key).items()
+                for k, i in self._storage_provider.list_keys_and_etags(key_prefix).items()
             }
         )
 
@@ -36,13 +38,13 @@ class CloudMapping(MutableMapping):
         return self._etags
 
     def __getitem__(self, key: str) -> bytes:
-        if key not in self._etags:
+        if not self.get_blindly and key not in self._etags:
             raise KeyError(key)
-        return self._storage_provider.download_data(key=self._encode_key(key), etag=self._etags[key])
+        return self._storage_provider.download_data(
+            key=self._encode_key(key), etag=None if self.get_blindly else self._etags[key]
+        )
 
     def __setitem__(self, key: str, value: bytes) -> None:
-        if not isinstance(value, bytes):
-            raise ValueError("Value must be bytes like")
         self._etags[key] = self._storage_provider.upload_data(
             key=self._encode_key(key),
             etag=self._etags.get(key, None),
@@ -84,6 +86,7 @@ class CloudMapping(MutableMapping):
 
         mapping.sync_with_cloud = raw_mapping.sync_with_cloud
         mapping.etags = raw_mapping.etags
+        mapping.get_blindly = raw_mapping.get_blindly
         return mapping
 
     @classmethod

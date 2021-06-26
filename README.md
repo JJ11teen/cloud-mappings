@@ -74,9 +74,13 @@ del cm["key"]
 "key" in cm # returns false
 ```
 
-### Cloud Sync
+### Etags
 
-Each `cloud-mapping` keeps an internal dict of [etags](https://en.wikipedia.org/wiki/HTTP_ETag) which it uses to ensure it is only reading/overwriting/deleting data it expects to. If the value in storage is not what the `cloud-mapping` expects, a `cloudmappings.errors.KeySyncError()` will be thrown. If you know what you are doing and want your operation to go through anyway, you will need to sync your `cloud-mapping` with the cloud by calling either `.sync_with_cloud()` to sync all keys or `.sync_with_cloud(key)` to sync a specific key. By default `.sync_with_cloud()` is called on instantiation of a `cloud-mapping` if the underlying provider storage already exists. You may skip this initial sync by passing an additional `sync_initially=False` parameter when you instantiate your `cloud-mapping`.
+Each `cloud-mapping` keeps an internal dict of [etags](https://en.wikipedia.org/wiki/HTTP_ETag) which it uses to ensure it is only reading/overwriting/deleting data it expects to. If the value in storage is not what the `cloud-mapping` expects, a `cloudmappings.errors.KeySyncError()` will be thrown.
+
+If you would like to enable get (read) operations without ensuring etags, you can set `get_blindly=True`. This can be set in the constructor, or dynamically turned on and off directly on the `cloud-mapping` instance. Blindly getting a value that doesn't exist in the cloud will return `None`.
+
+If you know what you are doing and you want an operation other than get to go through despite etags, you will need to sync your `cloud-mapping` with the cloud by calling either `.sync_with_cloud()` to sync all keys or `.sync_with_cloud(key_prefix)` to sync a specific key or subset of keys. By default `.sync_with_cloud()` is called on instantiation of a `cloud-mapping` if the underlying provider storage already exists. You may skip this initial sync by passing an additional `sync_initially=False` parameter when you instantiate your `cloud-mapping`.
 
 ### Serialisation
 
@@ -84,4 +88,35 @@ If you don't call `.with_pickle()` and instead pass your providers configuration
 
 You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_buffers([dumps_1, dumps_2, ..., dumps_N], [loads_1, loads_2, ..., loads_N])`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
 
+
+
+
+
+# Development
+
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+This project uses `.devcontainer` to describe the environment to use for development. You may use the environment described in this directory (it integrates automatically with vscode's 'remote containers' extension), or you may create your own environment with the same dependencies.
+
+## Dependencies
+Install development dependencies with:
+
+`pip install .[azureblob,azuretable,gcpstorage,awss3,tests]`
+
+## Tests
+Set environment variables for each provider:
+* Azure Blob: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`
+* Azure Table: `AZURE_TABLE_STORAGE_CONNECTION_STRING`
+* GCP Storage: `GOOGLE_APPLICATION_CREDENTIALS` (path to credentials file)
+* AWS S3: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+Run tests with:
+```bash
+pytest
+    --azure_blob_storage_account_url <azure-blob-storage-account-url>
+    --azure_table
+    --gcp_storage_project <gcp-project-id>
+    --aws_s3
+    --test_container_id <unique-test-run-id>
+```
+You can turn on/off tests for individual providers by including/excluding their parameters in the above command. `--test_container_id` is always required.

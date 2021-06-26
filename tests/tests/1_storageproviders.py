@@ -27,9 +27,24 @@ class StorageProviderTests:
         encoded_key = storage_provider.encode_key(key)
 
         etag = storage_provider.upload_data(encoded_key, None, b"data")
-        data = storage_provider.download_data(encoded_key, etag)
+        assert storage_provider.download_data(encoded_key, etag) == b"data"
 
-        assert data == b"data"
+    def test_non_byte_values_error(self, storage_provider: StorageProvider, test_id: str):
+        key = test_id + "-non-bytes-error"
+        encoded_key = storage_provider.encode_key(key)
+
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, True)
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, 10)
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, "string-data")
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, [0, 1, 0, 1])
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, {"or": "something more", "elaborate": True})
+        with pytest.raises(ValueError, match="must be bytes like"):
+            storage_provider.upload_data(encoded_key, None, None)
 
     def test_keys_and_etags_are_listed(self, storage_provider: StorageProvider, test_id: str):
         key_1 = test_id + "-keys-and-etags-list-test-1"
@@ -87,3 +102,13 @@ class StorageProviderTests:
         second_etag = storage_provider.upload_data(encoded_key, first_etag, b"static-data")
 
         assert first_etag != second_etag
+
+    def test_download_with_no_etag(self, storage_provider: StorageProvider, test_id: str):
+        key = test_id + "-download-with-no-etag"
+        encoded_key = storage_provider.encode_key(key)
+
+        # Assert no value returns None
+        assert storage_provider.download_data(encoded_key, None) is None
+        # Assert returns latest if value
+        storage_provider.upload_data(encoded_key, None, b"data")
+        assert storage_provider.download_data(encoded_key, None) == b"data"
