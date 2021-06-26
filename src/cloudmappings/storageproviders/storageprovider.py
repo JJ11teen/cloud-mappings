@@ -49,7 +49,7 @@ class StorageProvider(ABC):
     @abstractmethod
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         """Upload data to cloud storage. Raise KeyCloudSyncError if etag does not match the latest
-        version in the cloud.
+        version in the cloud. Raise ValueError is data is not bytes.
         :param etag: Expected etag if key already exists. Otherwise None
         :return: Etag of newly uploaded data, as str.
         """

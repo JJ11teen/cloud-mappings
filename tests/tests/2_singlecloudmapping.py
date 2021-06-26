@@ -32,21 +32,6 @@ class SingleCloudMappingTests:
         else:
             pytest.fail("Unknown provider repr")
 
-    def test_non_byte_values_error(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
-        key = test_id + "non-bytes-error"
-
-        with pytest.raises(ValueError, match="must be bytes like"):
-            cm[key] = True
-        with pytest.raises(ValueError, match="must be bytes like"):
-            cm[key] = 10
-        with pytest.raises(ValueError, match="must be bytes like"):
-            cm[key] = "string-data"
-        with pytest.raises(ValueError, match="must be bytes like"):
-            cm[key] = [0, 1, 0, 1]
-        with pytest.raises(ValueError, match="must be bytes like"):
-            cm[key] = {"or": "something more", "elaborate": True}
-
     def test_no_key_errors(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
         key = test_id + "/no-key-errors-test"
@@ -67,6 +52,16 @@ class SingleCloudMappingTests:
         assert cm[test_id + "-key-A"] == b"100"
         assert cm[test_id + "-key-a"] == b"uncapitalised"
         assert cm[test_id + "-key-3"] == b"three"
+
+    def test_get_blindly_defaults_none(self, storage_provider: StorageProvider, test_id: str):
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+        key = test_id + "/get-blindly-test"
+
+        # CloudMappings default to not getting blindly:
+        assert not cm.get_blindly
+        # If get_blindly, values default to None
+        cm.get_blindly = True
+        assert cm[key] is None
 
     def test_complex_keys(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)

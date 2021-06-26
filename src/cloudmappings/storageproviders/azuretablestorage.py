@@ -3,7 +3,7 @@ from typing import Dict
 from urllib.parse import quote, unquote
 
 from azure.core import MatchConditions
-from azure.core.exceptions import ResourceExistsError, HttpResponseError
+from azure.core.exceptions import ResourceExistsError, HttpResponseError, ResourceNotFoundError
 from azure.data.tables import TableClient, UpdateMode
 
 from .storageprovider import StorageProvider
@@ -16,7 +16,7 @@ def _chunk_bytes(data: bytes) -> Dict[str, bytes]:
 
 
 def _dechunk_entity(entity: Dict[str, bytes]) -> bytes:
-    return b"".join([v.value for k, v in entity.items() if k.startswith("d_")])
+    return b"".join([v for k, v in entity.items() if k.startswith("d_")])
 
 
 class AzureTableStorageProvider(StorageProvider):
@@ -59,15 +59,23 @@ class AzureTableStorageProvider(StorageProvider):
         return False
 
     def download_data(self, key: str, etag: str) -> bytes:
-        entity = self._table_client.get_entity(
-            partition_key=key,
-            row_key="cm",
-        )
-        if etag is not None and etag != entity.metadata["etag"]:
-            self.raise_key_sync_error(key=key, etag=etag)
-        return _dechunk_entity(entity)
+        try:
+            entity = self._table_client.get_entity(
+                partition_key=key,
+                row_key="cm",
+            )
+        except ResourceNotFoundError as e:
+            if etag is None:
+                return None
+            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+        else:
+            if etag is not None and etag != entity.metadata["etag"]:
+                self.raise_key_sync_error(key=key, etag=etag)
+            return _dechunk_entity(entity)
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
+        if not isinstance(data, bytes):
+            raise ValueError("Data must be bytes like")
         entity = {
             "PartitionKey": key,
             "RowKey": "cm",

@@ -49,13 +49,17 @@ class GoogleCloudStorageProvider(StorageProvider):
             blob_name=key,
         )
         existing_etag = self._parse_etag(b)
-        if etag != existing_etag:
+        if etag is not None and etag != existing_etag:
             self.raise_key_sync_error(key=key, etag=etag)
+        if b is None:
+            return None
         return b.download_as_bytes(
             if_generation_match=b.generation,
         )
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
+        if not isinstance(data, bytes):
+            raise ValueError("Data must be bytes like")
         b = self._bucket.get_blob(
             blob_name=key,
         )
