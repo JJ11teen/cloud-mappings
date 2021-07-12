@@ -11,11 +11,11 @@ class CloudMapping(MutableMapping):
         self,
         storage_provider: StorageProvider,
         sync_initially: bool = True,
-        get_blindly: bool = False,
+        read_blindly: bool = False,
     ) -> None:
         self._storage_provider = storage_provider
         self._etags = {}
-        self.get_blindly = get_blindly
+        self._read_blindly = read_blindly
         if self._storage_provider.create_if_not_exists() and sync_initially:
             self.sync_with_cloud()
 
@@ -37,11 +37,17 @@ class CloudMapping(MutableMapping):
     def etags(self):
         return self._etags
 
+    def get_read_blindly(self) -> bool:
+        return self._read_blindly
+
+    def set_read_blindly(self, read_blindly: bool):
+        self._read_blindly = read_blindly
+
     def __getitem__(self, key: str) -> bytes:
-        if not self.get_blindly and key not in self._etags:
+        if not self._read_blindly and key not in self._etags:
             raise KeyError(key)
         return self._storage_provider.download_data(
-            key=self._encode_key(key), etag=None if self.get_blindly else self._etags[key]
+            key=self._encode_key(key), etag=None if self._read_blindly else self._etags[key]
         )
 
     def __setitem__(self, key: str, value: bytes) -> None:
@@ -86,7 +92,8 @@ class CloudMapping(MutableMapping):
 
         mapping.sync_with_cloud = raw_mapping.sync_with_cloud
         mapping.etags = raw_mapping.etags
-        mapping.get_blindly = raw_mapping.get_blindly
+        mapping.get_read_blindly = raw_mapping.get_read_blindly
+        mapping.set_read_blindly = raw_mapping.set_read_blindly
         return mapping
 
     @classmethod

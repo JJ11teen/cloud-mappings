@@ -8,6 +8,27 @@ from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
 class CloudMappingUtilityTests:
+    def test_with_buffers_includes_extra(self, storage_provider: StorageProvider, test_id: str):
+        cm = CloudMapping.with_buffers(
+            [lambda i: i],
+            [lambda i: i],
+            storage_provider=storage_provider,
+            sync_initially=False,
+        )
+
+        key = test_id + "includes-extras"
+
+        # etags are inherited
+        assert cm.etags is not None
+        cm[key] = b"0"
+        assert key in cm.etags
+
+        # get_blindy is inherited
+        assert cm.get_read_blindly() == False
+        cm.set_read_blindly(True)
+        assert cm.get_read_blindly() == True
+        assert cm.get_read_blindly() == cm.d.get_read_blindly()
+
     def test_with_buffers_fails_with_uneven_buffers(self, storage_provider: StorageProvider):
         with pytest.raises(ValueError, match="equal number of input buffers as output buffers"):
             CloudMapping.with_buffers(

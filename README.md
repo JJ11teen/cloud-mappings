@@ -78,7 +78,7 @@ del cm["key"]
 
 Each `cloud-mapping` keeps an internal dict of [etags](https://en.wikipedia.org/wiki/HTTP_ETag) which it uses to ensure it is only reading/overwriting/deleting data it expects to. If the value in storage is not what the `cloud-mapping` expects, a `cloudmappings.errors.KeySyncError()` will be thrown.
 
-If you would like to enable get (read) operations without ensuring etags, you can set `get_blindly=True`. This can be set in the constructor, or dynamically turned on and off directly on the `cloud-mapping` instance. Blindly getting a value that doesn't exist in the cloud will return `None`.
+If you would like to enable read (get) operations without ensuring etags, you can set `read_blindly=True`. This can be set in the constructor, or dynamically turned on and off with `set_read_blindly(True)` and `set_read_blindly(False)` respectively. Blindly reading a value that doesn't exist in the cloud will return `None`.
 
 If you know what you are doing and you want an operation other than get to go through despite etags, you will need to sync your `cloud-mapping` with the cloud by calling either `.sync_with_cloud()` to sync all keys or `.sync_with_cloud(key_prefix)` to sync a specific key or subset of keys. By default `.sync_with_cloud()` is called on instantiation of a `cloud-mapping` if the underlying provider storage already exists. You may skip this initial sync by passing an additional `sync_initially=False` parameter when you instantiate your `cloud-mapping`.
 

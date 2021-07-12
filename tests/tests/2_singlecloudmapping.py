@@ -53,14 +53,14 @@ class SingleCloudMappingTests:
         assert cm[test_id + "-key-a"] == b"uncapitalised"
         assert cm[test_id + "-key-3"] == b"three"
 
-    def test_get_blindly_defaults_none(self, storage_provider: StorageProvider, test_id: str):
+    def test_read_blindly_defaults_none(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
-        key = test_id + "/get-blindly-test"
+        key = test_id + "/read-blindly-test"
 
         # CloudMappings default to not getting blindly:
-        assert not cm.get_blindly
+        assert not cm.get_read_blindly()
         # If get_blindly, values default to None
-        cm.get_blindly = True
+        cm.set_read_blindly(True)
         assert cm[key] is None
 
     def test_complex_keys(self, storage_provider: StorageProvider, test_id: str):
