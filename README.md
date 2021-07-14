@@ -105,18 +105,12 @@ Install development dependencies with:
 
 ## Tests
 Set environment variables for each provider:
-* Azure Blob: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`
+* Azure Blob: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_BLOB_STORAGE_ACCOUNT_URL`
 * Azure Table: `AZURE_TABLE_STORAGE_CONNECTION_STRING`
-* GCP Storage: `GOOGLE_APPLICATION_CREDENTIALS` (path to credentials file)
+* GCP Storage: `GOOGLE_APPLICATION_CREDENTIALS` (path to credentials file), `GOOGLE_CLOUD_STORAGE_PROJECT`
 * AWS S3: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
 
 Run tests with:
 ```bash
-pytest
-    --azure_blob_storage_account_url <azure-blob-storage-account-url>
-    --azure_table
-    --gcp_storage_project <gcp-project-id>
-    --aws_s3
-    --test_container_id <unique-test-run-id>
+pytest --test_container_id <unique-test-run-id>
 ```
-You can turn on/off tests for individual providers by including/excluding their parameters in the above command. `--test_container_id` is always required.

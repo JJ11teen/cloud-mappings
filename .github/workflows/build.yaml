@@ -37,16 +37,13 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_BLOB_STORAGE_ACCOUNT_URL: ${{ secrets.AZURE_BLOB_STORAGE_ACCOUNT_URL }}
           AZURE_TABLE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_TABLE_STORAGE_CONNECTION_STRING }}
           GCP_CREDENTIALS_BASE64: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
           GOOGLE_APPLICATION_CREDENTIALS: gcp.json
+          GOOGLE_CLOUD_STORAGE_PROJECT: ${{ secrets.GOOGLE_CLOUD_STORAGE_PROJECT }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           echo $GCP_CREDENTIALS_BASE64 | base64 -d > gcp.json
-          pytest \
-            --azure_blob_storage_account_url https://cloudmappingtests.blob.core.windows.net/ \
-            --azure_table \
-            --gcp_storage_project cloud-mappings-test \
-            --aws_s3 \
-            --test_container_id "${GITHUB_SHA::8}${{ matrix.python-version-str }}"
+          pytest --test_container_id "${GITHUB_SHA::8}${{ matrix.python-version-str }}"
