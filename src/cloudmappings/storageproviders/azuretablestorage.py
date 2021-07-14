@@ -1,10 +1,10 @@
-import logging
 from typing import Dict
 from urllib.parse import quote, unquote
 
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, HttpResponseError, ResourceNotFoundError
 from azure.data.tables import TableClient, UpdateMode
+from azure.identity import DefaultAzureCredential
 
 from .storageprovider import StorageProvider
 
@@ -23,12 +23,10 @@ class AzureTableStorageProvider(StorageProvider):
     def __init__(
         self,
         table_name: str,
-        connection_string: str = None,
         endpoint: str = None,
-        credential=None,
+        credential=DefaultAzureCredential(),
+        connection_string: str = None,
     ) -> None:
-        if endpoint is None and connection_string is None:
-            raise ValueError("One of endpoint or connection_string must be supplied")
         if connection_string is not None:
             self._table_client = TableClient.from_connection_string(conn_str=connection_string, table_name=table_name)
         else:

@@ -25,9 +25,10 @@ pip install cloud-mappings[azureblob,azuretable,gcpstorage,awss3]
 from cloudmappings import AzureBlobMapping
 
 cm = AzureBlobMapping.with_pickle(
-    account_url="AZURE_BLOB_STORAGE_URL",
     container_name="CONTAINER_NAME",
+    account_url="AZURE_BLOB_STORAGE_URL",
     credential=AZURE_CREDENTIAL_OBJECT,
+    connection_string="AZURE_BLOB_STORAGE_CONNECTION_STRING",
 )
 ```
 
@@ -36,8 +37,10 @@ cm = AzureBlobMapping.with_pickle(
 from cloudmappings import AzureTableMapping
 
 cm = AzureTableMapping.with_pickle(
-    connection_string="AZURE_TABLE_CONNECTION_STRING",
     table_name="TABLE_NAME",
+    endpoint="AZURE_TABLE_ENDPOINT",
+    credential=AZURE_CREDENTIAL_OBJECT,
+    connection_string="AZURE_TABLE_CONNECTION_STRING",
 )
 ```
 Note that Azure Table Storage has a 1MB size limit per entity.
@@ -47,9 +50,9 @@ Note that Azure Table Storage has a 1MB size limit per entity.
 from cloudmappings import GoogleCloudStorageMapping
 
 cm = GoogleCloudStorageMapping.with_pickle(
+    bucket_name="BUCKET_NAME",
     project="GCP_PROJECT",
     credentials=GCP_CREDENTIALS_OBJECT,
-    bucket_name="BUCKET_NAME",
 )
 ```
 
@@ -82,6 +85,8 @@ If you would like to enable read (get) operations without ensuring etags, you ca
 
 If you know what you are doing and you want an operation other than get to go through despite etags, you will need to sync your `cloud-mapping` with the cloud by calling either `.sync_with_cloud()` to sync all keys or `.sync_with_cloud(key_prefix)` to sync a specific key or subset of keys. By default `.sync_with_cloud()` is called on instantiation of a `cloud-mapping` if the underlying provider storage already exists. You may skip this initial sync by passing an additional `sync_initially=False` parameter when you instantiate your `cloud-mapping`.
 
+The `etags` property on a `cloud-mapping` can be manually inspected and adjusted for advanced use cases, but it is not recommended if your use case can be accomplished with the above methods.
+
 ### Serialisation
 
 If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `CloudMapping` class, you will get a "raw" `cloud-mapping` which accepts only byte-likes as values. Along with the `.with_pickle()` serialisation utility, `.with_json()` and `.with_json_zlib()` also exist.
@@ -112,5 +117,6 @@ Set environment variables for each provider:
 
 Run tests with:
 ```bash
-pytest --test_container_id <unique-test-run-id>
+pytest --test_container_id <container-to-use-for-tests>
 ```
+_* Note that if the container specified it is expected that one test will fail._
