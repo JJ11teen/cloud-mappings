@@ -8,7 +8,7 @@ from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
 class CloudMappingUtilityTests:
-    def test_with_buffers_includes_extra(self, storage_provider: StorageProvider, test_id: str):
+    def test_with_buffers_includes_extras(self, storage_provider: StorageProvider, test_id: str):
         cm = CloudMapping.with_buffers(
             [lambda i: i],
             [lambda i: i],
