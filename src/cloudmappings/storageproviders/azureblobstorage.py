@@ -12,16 +12,22 @@ from .storageprovider import StorageProvider
 class AzureBlobStorageProvider(StorageProvider):
     def __init__(
         self,
-        account_url: str,
         container_name: str,
+        account_url: str,
         credential=DefaultAzureCredential(),
+        connection_string: str = None,
         create_container_metadata=None,
     ) -> None:
-        self._container_client = ContainerClient(
-            account_url=account_url,
-            container_name=container_name,
-            credential=credential,
-        )
+        if connection_string:
+            self._container_client = ContainerClient.from_connection_string(
+                conn_str=connection_string, container_name=container_name
+            )
+        else:
+            self._container_client = ContainerClient(
+                account_url=account_url,
+                container_name=container_name,
+                credential=credential,
+            )
         self._create_container_metadata = create_container_metadata
 
     def logical_name(self) -> str:

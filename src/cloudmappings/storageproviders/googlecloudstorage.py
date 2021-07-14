@@ -10,8 +10,8 @@ from .storageprovider import StorageProvider
 class GoogleCloudStorageProvider(StorageProvider):
     def __init__(
         self,
-        project: str,
         bucket_name: str,
+        project: str,
         credentials=None,
     ) -> None:
         self._client = storage.Client(
