@@ -34,7 +34,7 @@ class CloudMapping(MutableMapping):
         )
 
     @property
-    def etags(self):
+    def etags(self) -> Dict:
         return self._etags
 
     def get_read_blindly(self) -> bool:
