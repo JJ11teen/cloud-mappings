@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Callable, List, MutableMapping, Dict
+from typing import Callable, Dict, List, MutableMapping
 
 from .storageproviders.storageprovider import StorageProvider
 
@@ -20,7 +20,17 @@ class CloudMapping(MutableMapping):
     ----------
     etags : dict
         A mapping of known keys to their expected etags.
+
+    Methods
+    -------
+    sync_with_cloud()
+        Synchronise the cloud-mapping with what is in the underlying cloud resource
+    get_read_blindly()
+        Get whether the cloud-mapping is currently set to read from the cloud blindly
+    set_read_blindly(read_blindly: bool)
+        Set whether the cloud-mapping should read from the cloud blindly or not
     """
+
     _etags: Dict[str, str]
 
     def __init__(
@@ -53,11 +63,11 @@ class CloudMapping(MutableMapping):
 
     def sync_with_cloud(self, key_prefix: str = None) -> None:
         """Synchronise this cloud-mapping's etags with the cloud.
-        
+
         This allows a cloud-mapping to reflect the most recent updates to the cloud resource,
         including those made by other instances or users. This can allow destructive operations
         as a user may sync to get the latest updates, and then overwrite or delete keys.
-        
+
         Consider calling this if you are encountering a `cloudmappings.errors.KeySyncError`,
         and you are sure you would like to force the operation anyway.
 
@@ -66,7 +76,7 @@ class CloudMapping(MutableMapping):
         Parameters
         ----------
         key_prefix : str, optional
-            Only sync keys beginning with the specified prefix 
+            Only sync keys beginning with the specified prefix
         """
         key_prefix = None if key_prefix is None else self._encode_key(key_prefix)
         self._etags.update(
@@ -80,10 +90,10 @@ class CloudMapping(MutableMapping):
     def etags(self) -> Dict:
         """An internal dictionary of etags used to ensure the cloud-mapping is in sync with
         the cloud storage resource. The dict is itself a mapping, mapping keys to their etags.
-        
+
         This dictionary is used as the cloud-mapping's expected view of the cloud. It is used
         to determine if a key exists, and ensure that the value at each key is expected.
-        
+
         See: https://en.wikipedia.org/wiki/HTTP_ETag
         """
         return self._etags
@@ -100,7 +110,7 @@ class CloudMapping(MutableMapping):
         When read blindly is `True`, a cloud-mapping will return the latest cloud version
         for any key accessed, including keys it has no prior knowledge of (ie not in it's etag
         dict). If there is no value for a key in the cloud `None` will be returned.
-        
+
         When read blindly is `True` a cloud-mapping will not raise `KeyValue` or
         `cloudmappings.errors.KeySyncError` errors for read/get operations.
 
@@ -125,7 +135,7 @@ class CloudMapping(MutableMapping):
         When read blindly is `True`, a cloud-mapping will return the latest cloud version
         for any key accessed, including keys it has no prior knowledge of (ie not in it's etag
         dict). If there is no value for a key in the cloud `None` will be returned.
-        
+
         When read blindly is `True` a cloud-mapping will not raise `KeyValue` or
         `cloudmappings.errors.KeySyncError` errors for read/get operations.
 
@@ -134,7 +144,7 @@ class CloudMapping(MutableMapping):
         Parameters
         ----------
         read_blindly : bool
-            The value to set read_blindly to 
+            The value to set read_blindly to
         """
         self._read_blindly = read_blindly
 
@@ -297,7 +307,8 @@ class CloudMapping(MutableMapping):
         CloudMapping
             A new cloud-mapping setup with zlib compression and JSON string serialisation
         """
-        import json, zlib
+        import json
+        import zlib
 
         return cls.with_serialisers(
             [json.dumps, partial(bytes, encoding=encoding), zlib.compress],
