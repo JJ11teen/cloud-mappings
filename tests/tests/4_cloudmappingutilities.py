@@ -30,7 +30,7 @@ class CloudMappingUtilityTests:
         assert cm.get_read_blindly() == cm.d.get_read_blindly()
 
     def test_with_serialisers_fails_with_uneven_buffers(self, storage_provider: StorageProvider):
-        with pytest.raises(ValueError, match="equal number of input buffers as output buffers"):
+        with pytest.raises(ValueError, match="equal number of dumps functions as loads functions"):
             CloudMapping.with_serialisers(
                 [lambda i: i, lambda i: i],
                 [lambda i: i],
