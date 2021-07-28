@@ -23,7 +23,7 @@ class StorageProvider(ABC):
         """Returns a human readable string identifying the current implementation, and which
         logical cloud resouce it is currently mapping to. Does not include any credential or
         secret information.
-        
+
         Returns
         -------
         str
@@ -39,7 +39,7 @@ class StorageProvider(ABC):
             * Azure Blob Storage: A Blob Container
             * GCP GCS: A GCS Bucket
             * AWS S3: An S3 Bucket
-        
+
         Returns
         -------
         bool
@@ -50,21 +50,21 @@ class StorageProvider(ABC):
     @abstractmethod
     def download_data(self, key: str, etag: str) -> bytes:
         """Download data from cloud storage
-        
+
         Downloads the data at the specified key and with the specified etag from cloud storage.
-        
+
         If `None` is passed for etag the latest version in the cloud will be downloaded.
         Otherwise the etag will be used to ensure the data downloaded has a matching etag. If
         the etag does not match the latest cloud version, a `cloudmappings.errors.KeySyncError`
         will be raised.
-        
+
         Parameters
         ----------
         key : str
             The key specifying which data to download
         etag : str or None
             Etag of the expected latest value in the cloud, or `None`
-        
+
         Raises
         ------
         KeySyncError
@@ -80,7 +80,7 @@ class StorageProvider(ABC):
     @abstractmethod
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         """Upload data to cloud storage
-        
+
         Uploads data at the specified key to cloud storage, only overwriting if the etag matches
 
         Parameters
@@ -110,7 +110,7 @@ class StorageProvider(ABC):
     @abstractmethod
     def delete_data(self, key: str, etag: str) -> None:
         """Delete data from cloud storage.
-        
+
         Deletes data at the specified key from cloud storage, only if the etag matches
 
         Parameters

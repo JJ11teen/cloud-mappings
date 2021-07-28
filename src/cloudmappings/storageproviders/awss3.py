@@ -6,7 +6,6 @@ import boto3
 
 from .storageprovider import StorageProvider
 
-
 _metadata_etag_key = "cloud-mappings-etag"
 
 

@@ -1,13 +1,13 @@
+import logging
 import os
 from uuid import uuid4
-import logging
 
 import pytest
 
+from cloudmappings.storageproviders.awss3 import AWSS3Provider
 from cloudmappings.storageproviders.azureblobstorage import AzureBlobStorageProvider
 from cloudmappings.storageproviders.azuretablestorage import AzureTableStorageProvider
 from cloudmappings.storageproviders.googlecloudstorage import GoogleCloudStorageProvider
-from cloudmappings.storageproviders.awss3 import AWSS3Provider
 
 
 def pytest_addoption(parser):

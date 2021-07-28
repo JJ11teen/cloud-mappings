@@ -2,7 +2,11 @@ from typing import Dict
 from urllib.parse import quote, unquote
 
 from azure.core import MatchConditions
-from azure.core.exceptions import ResourceExistsError, HttpResponseError, ResourceNotFoundError
+from azure.core.exceptions import (
+    HttpResponseError,
+    ResourceExistsError,
+    ResourceNotFoundError,
+)
 from azure.data.tables import TableClient, UpdateMode
 from azure.identity import DefaultAzureCredential
 
@@ -23,7 +27,7 @@ class AzureTableStorageProvider(StorageProvider):
     def __init__(
         self,
         table_name: str,
-        endpoint: str = None,
+        endpoint: str,
         credential=DefaultAzureCredential(),
         connection_string: str = None,
     ) -> None:

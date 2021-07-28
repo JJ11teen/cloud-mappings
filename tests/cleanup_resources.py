@@ -4,8 +4,8 @@ import os
 
 
 def cleanup_azure_blob_storage():
-    from azure.storage.blob import BlobServiceClient
     from azure.identity import DefaultAzureCredential
+    from azure.storage.blob import BlobServiceClient
 
     print("Deleting Azure Blob Storage containers:")
     client = BlobServiceClient(
