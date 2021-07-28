@@ -27,7 +27,7 @@ class AzureTableStorageProvider(StorageProvider):
     def __init__(
         self,
         table_name: str,
-        endpoint: str,
+        endpoint: str = None,
         credential=DefaultAzureCredential(),
         connection_string: str = None,
     ) -> None:

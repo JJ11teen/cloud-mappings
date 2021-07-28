@@ -24,7 +24,7 @@ class AzureBlobMapping(CloudMapping):
         ----------
         container_name : str
             The name of the Azure Storage Blob Container to use within the Azure Storage Account
-        account_url : str
+        account_url : str, default=None
             The url of the Azure Storage Account to use
         credential : default=DefaultAzureCredential()
             A credential object from `azure.identity`
@@ -58,7 +58,7 @@ class AzureTableMapping(CloudMapping):
         ----------
         table_name : str
             The name of the Azure Storage Table to use within the Azure Storage Account
-        endpoint : str
+        endpoint : str, default=None
             The table endpoint of the Azure Storage Account to use
         credential : default=DefaultAzureCredential()
             A credential object from `azure.identity`
