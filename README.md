@@ -91,7 +91,7 @@ The `etags` property on a `cloud-mapping` can be manually inspected and adjusted
 
 If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `CloudMapping` class, you will get a "raw" `cloud-mapping` which accepts only byte-likes as values. Along with the `.with_pickle()` serialisation utility, `.with_json()` and `.with_json_zlib()` also exist.
 
-You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_buffers([dumps_1, dumps_2, ..., dumps_N], [loads_1, loads_2, ..., loads_N])`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
+You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_serialisers([dumps_1, dumps_2, ..., dumps_N], [loads_1, loads_2, ..., loads_N])`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
 
 
 

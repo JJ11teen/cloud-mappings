@@ -1,10 +1,14 @@
-from typing import Dict
 import json
+from typing import Dict
 
 from azure.core import MatchConditions
-from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, ResourceNotFoundError
-from azure.storage.blob import ContainerClient
+from azure.core.exceptions import (
+    ResourceExistsError,
+    ResourceModifiedError,
+    ResourceNotFoundError,
+)
 from azure.identity import DefaultAzureCredential
+from azure.storage.blob import ContainerClient
 
 from .storageprovider import StorageProvider
 
@@ -13,7 +17,7 @@ class AzureBlobStorageProvider(StorageProvider):
     def __init__(
         self,
         container_name: str,
-        account_url: str,
+        account_url: str = None,
         credential=DefaultAzureCredential(),
         connection_string: str = None,
         create_container_metadata=None,

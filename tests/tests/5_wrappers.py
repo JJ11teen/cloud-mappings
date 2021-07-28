@@ -1,6 +1,9 @@
-import pytest
-
-from cloudmappings import AzureBlobMapping, AzureTableMapping, GoogleCloudStorageMapping, AWSS3Mapping
+from cloudmappings import (
+    AWSS3Mapping,
+    AzureBlobMapping,
+    AzureTableMapping,
+    GoogleCloudStorageMapping,
+)
 
 
 class WrapperTests:
