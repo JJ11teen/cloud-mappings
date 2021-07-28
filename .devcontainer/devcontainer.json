@@ -21,7 +21,9 @@
 			"--section-default",
 			"THIRDPARTY",
 			"--project",
-			"src"
+			"src",
+			"--project",
+			"cloudmappings",
 		],
 		"[python]": {
 			"editor.codeActionsOnSave": {
