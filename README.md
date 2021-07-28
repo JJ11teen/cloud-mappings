@@ -119,4 +119,4 @@ Run tests with:
 ```bash
 pytest --test_container_id <container-to-use-for-tests>
 ```
-_* Note that if the container specified it is expected that one test will fail._
+_* Note that if the container specified already exists it is expected that one test will fail._
