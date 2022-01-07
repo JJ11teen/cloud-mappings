@@ -280,7 +280,7 @@ class CloudMapping(MutableMapping):
         import json
 
         return cls.with_serialisers(
-            [json.dumps, partial(bytes, encoding=encoding)],
+            [partial(json.dumps, sort_keys=True), partial(bytes, encoding=encoding)],
             [partial(str, encoding=encoding), json.loads],
             *args,
             **kwargs,
@@ -311,7 +311,7 @@ class CloudMapping(MutableMapping):
         import zlib
 
         return cls.with_serialisers(
-            [json.dumps, partial(bytes, encoding=encoding), zlib.compress],
+            [partial(json.dumps, sort_keys=True), partial(bytes, encoding=encoding), zlib.compress],
             [zlib.decompress, partial(str, encoding=encoding), json.loads],
             *args,
             **kwargs,
