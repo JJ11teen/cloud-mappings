@@ -81,7 +81,7 @@ del cm["key"]
 
 Each `cloud-mapping` keeps an internal dict of [etags](https://en.wikipedia.org/wiki/HTTP_ETag) which it uses to ensure it is only reading/overwriting/deleting data it expects to. If the value in storage is not what the `cloud-mapping` expects, a `cloudmappings.errors.KeySyncError()` will be thrown.
 
-If you would like to enable read (get) operations without ensuring etags, you can set `read_blindly=True`. This can be set in the constructor, or dynamically turned on and off with `set_read_blindly(True)` and `set_read_blindly(False)` respectively. Blindly reading a value that doesn't exist in the cloud will return `None`.
+If you would like to enable read (get) operations without ensuring etags, you can set `read_blindly=True`. This can be set in the constructor, or dynamically on the cloud-mapping instance. Blindly reading a value that doesn't exist in the cloud will return the mapping's current value of `read_blindly_default` (which itself defaults to `None`).
 
 If you know what you are doing and you want an operation other than get to go through despite etags, you will need to sync your `cloud-mapping` with the cloud by calling either `.sync_with_cloud()` to sync all keys or `.sync_with_cloud(key_prefix)` to sync a specific key or subset of keys. By default `.sync_with_cloud()` is called on instantiation of a `cloud-mapping` if the underlying provider storage already exists. You may skip this initial sync by passing an additional `sync_initially=False` parameter when you instantiate your `cloud-mapping`.
 
@@ -89,9 +89,7 @@ The `etags` property on a `cloud-mapping` can be manually inspected and adjusted
 
 ### Serialisation
 
-If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `CloudMapping` class, you will get a "raw" `cloud-mapping` which accepts only byte-likes as values. Along with the `.with_pickle()` serialisation utility, `.with_json()` and `.with_json_zlib()` also exist.
-
-You may build your own serialisation either using [zict](https://zict.readthedocs.io/en/latest/); or by calling `.with_serialisers([dumps_1, dumps_2, ..., dumps_N], [loads_1, loads_2, ..., loads_N])`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
+If you don't call `.with_pickle()` and instead pass your providers configuration directly to the `CloudMapping` class, you will get a "raw" `cloud-mapping` which accepts only byte-likes as values. Along with the `.with_pickle()` serialisation utility, `.with_json()` and `.with_json_zlib()` also exist. You may build your own serialisation by constructing your cloud-mapping with `ordered_dumps_funcs=[dumps_1, dumps_2, ..., dumps_N]` and `ordered_loads_funcs=[loads_1, loads_2, ..., loads_N]`, where `dumps` and `loads` are the ordered functions to serialise and parse your data respectively.
 
 
 
@@ -117,6 +115,6 @@ Set environment variables for each provider:
 
 Run tests with:
 ```bash
-pytest --test_container_id <container-to-use-for-tests>
+pytest --test_container_id <container-suffix-to-use-for-tests>
 ```
-_* Note that if the container specified already exists it is expected that one test will fail._
+The testing container will be prefixed by "pytest", and the commit sha is used within build & release workflows. Note that if the container specified already exists one test will fail.

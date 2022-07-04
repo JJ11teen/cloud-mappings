@@ -31,10 +31,6 @@ class AzureBlobMapping(CloudMapping):
         connection_string : str, default=None
             A connection string to use for the Azure Blob Storage Container. Takes precedence over
             `account_url` and `credential` if given
-        sync_initially : bool, default=True
-            Whether to call `sync_with_cloud` initially
-        read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `get_read_blindly` for more information
 
         See Also
         --------
@@ -65,10 +61,6 @@ class AzureTableMapping(CloudMapping):
         connection_string : str, default=None
             A connection string to use for the Azure Table Storage Table. Takes precedence over
             `endpoint` and `credential` if given
-        sync_initially : bool, default=True
-            Whether to call `sync_with_cloud` initially
-        read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `get_read_blindly` for more information
 
         See Also
         --------
@@ -92,10 +84,6 @@ class GoogleCloudStorageMapping(CloudMapping):
             The GCP project to use
         credentials : optional
             A credentials object from various google client libraries
-        sync_initially : bool, default=True
-            Whether to call `sync_with_cloud` initially
-        read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `get_read_blindly` for more information
 
         See Also
         --------
@@ -123,10 +111,6 @@ class AWSS3Mapping(CloudMapping):
             The name of the S3 Bucket to use within AWS
         silence_warning : bool, default=False
             Whether to silence the warning logged about using S3 backed cloud-mappings concurrently
-        sync_initially : bool, default=True
-            Whether to call `sync_with_cloud` initially
-        read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `get_read_blindly` for more information
 
         See Also
         --------
