@@ -44,14 +44,14 @@ class ConcurrentCloudMappingTests:
 
         # Session 2 blindly gets by default, but can be turned off:
         assert sess_2[key] == b"data"
-        sess_2.set_read_blindly(False)
+        sess_2.read_blindly = False
         with pytest.raises(KeyError):
             sess_2[key]
 
         # Session 3 dones't blindly get by default, but can be set to:
         with pytest.raises(KeyError):
             sess_3[key]
-        sess_3.set_read_blindly(True)
+        sess_3.read_blindly = True
         assert sess_3[key] == b"data"
 
     def test_manual_change_error(self, storage_provider: StorageProvider, test_id: str):

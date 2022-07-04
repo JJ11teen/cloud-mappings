@@ -58,9 +58,9 @@ class SingleCloudMappingTests:
         key = test_id + "/read-blindly-test"
 
         # CloudMappings default to not getting blindly:
-        assert not cm.get_read_blindly()
+        assert not cm.read_blindly
         # If get_blindly, values default to None
-        cm.set_read_blindly(True)
+        cm.read_blindly = True
         assert cm[key] is None
 
     def test_complex_keys(self, storage_provider: StorageProvider, test_id: str):
