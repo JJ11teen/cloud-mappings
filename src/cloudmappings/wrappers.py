@@ -1,18 +1,14 @@
 from .cloudstoragemapping import CloudMapping
 
 
-def _parse_cloud_mapping_kwargs(kwargs):
-    cloud_mapping_kwargs = {}
-
-    try:
-        cloud_mapping_kwargs["sync_initially"] = kwargs.pop("sync_initially")
-    except KeyError:
-        pass
-    try:
-        cloud_mapping_kwargs["read_blindly"] = kwargs.pop("read_blindly")
-    except KeyError:
-        pass
-
+def _parse_cloud_mapping_kwargs(kwargs: dict):
+    cloud_mapping_kwargs = dict(
+        sync_initially=kwargs.pop("sync_initially", True),
+        read_blindly=kwargs.pop("read_blindly", False),
+        read_blindly_default=kwargs.pop("read_blindly_default", None),
+        ordered_dumps_funcs=kwargs.pop("ordered_dumps_funcs", None),
+        ordered_loads_funcs=kwargs.pop("ordered_loads_funcs", None),
+    )
     return cloud_mapping_kwargs, kwargs
 
 
