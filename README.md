@@ -104,11 +104,11 @@ This project uses `.devcontainer` to describe the environment to use for develop
 ## Dependencies
 Install development dependencies with:
 
-`pip install .[azureblob,azuretable,gcpstorage,awss3,tests]`
+`pip install -e .[azureblob,azuretable,gcpstorage,awss3,tests]`
 
 ## Tests
 Set environment variables for each provider:
-* Azure Blob: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_BLOB_STORAGE_ACCOUNT_URL`
+* Azure Blob: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_BLOB_STORAGE_ACCOUNT_URL`, `AZURE_BLOB_STORAGE_HIERARCHICAL_ACCOUNT_URL` (the tests assume the same secret is used for both)
 * Azure Table: `AZURE_TABLE_STORAGE_CONNECTION_STRING`
 * GCP Storage: `GOOGLE_APPLICATION_CREDENTIALS` (path to credentials file), `GOOGLE_CLOUD_STORAGE_PROJECT`
 * AWS S3: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`

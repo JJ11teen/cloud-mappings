@@ -38,6 +38,11 @@ def azure_blob_storage_account_url():
 
 
 @pytest.fixture(scope="session")
+def azure_blob_storage_hierarchical_account_url():
+    return os.environ["AZURE_BLOB_STORAGE_HIERARCHICAL_ACCOUNT_URL"]
+
+
+@pytest.fixture(scope="session")
 def azure_table_storage_connection_string():
     return os.environ["AZURE_TABLE_STORAGE_CONNECTION_STRING"]
 
@@ -52,12 +57,18 @@ def storage_provider(
     request,
     test_container_name,
     azure_blob_storage_account_url,
+    azure_blob_storage_hierarchical_account_url,
     azure_table_storage_connection_string,
     gcp_storage_project,
 ):
     if request.param == "azure_blob_storage":
         return AzureBlobStorageProvider(
             account_url=azure_blob_storage_account_url,
+            container_name=test_container_name,
+        )
+    elif request.param == "azure_blob_storage_hierarchical":
+        return AzureBlobStorageProvider(
+            account_url=azure_blob_storage_hierarchical_account_url,
             container_name=test_container_name,
         )
     elif request.param == "azure_table_storage":
@@ -81,6 +92,12 @@ def pytest_generate_tests(metafunc):
     if "storage_provider" in metafunc.fixturenames:
         metafunc.parametrize(
             "storage_provider",
-            ["azure_blob_storage", "azure_table_storage", "google_cloud_storage", "aws_s3"],
+            [
+                "azure_blob_storage",
+                "azure_blob_storage_hierarchical",
+                "azure_table_storage",
+                "google_cloud_storage",
+                "aws_s3",
+            ],
             indirect=True,
         )
