@@ -99,4 +99,13 @@ class AzureBlobStorageProvider(StorageProvider):
             self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
-        return {b.name: b.etag for b in self._container_client.list_blobs(name_starts_with=key_prefix)}
+        # If the container has hierarchical namespaces enabled, this call
+        # will return files as well as subdirectories.
+        # Unforunately there is no serverside api to filter, so we
+        # rely on checking the content_type & content_md5 hash
+        # If both are None, we assume the listing is a dir skip it
+        return {
+            b.name: b.etag
+            for b in self._container_client.list_blobs(name_starts_with=key_prefix)
+            if b.content_settings.content_type is not None and b.content_settings.content_md5 is not None
+        }

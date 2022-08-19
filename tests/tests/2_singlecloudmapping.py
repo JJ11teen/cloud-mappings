@@ -106,3 +106,27 @@ class SingleCloudMappingTests:
 
         cm[key_3] = b"c"
         assert len(cm) == 3
+
+    def test_subdir_sync(self, storage_provider: StorageProvider, test_id: str):
+        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+        prefix = test_id + "/subdir-sync-test"
+        key = prefix + "/filename"
+
+        assert prefix not in cm
+        assert key not in cm
+        assert len(cm) == 0
+
+        cm.sync_with_cloud(prefix)
+        assert prefix not in cm
+        assert key not in cm
+        assert len(cm) == 0
+
+        cm[key] = b"data"
+        assert prefix not in cm
+        assert key in cm
+        assert len(cm) == 1
+
+        cm.sync_with_cloud(prefix)
+        assert prefix not in cm
+        assert key in cm
+        assert len(cm) == 1

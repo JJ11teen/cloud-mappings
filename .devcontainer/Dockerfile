@@ -1,5 +1,5 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.177.0/containers/python-3/.devcontainer/base.Dockerfile
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.6
+FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.7
 
 # Install az
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \

@@ -10,14 +10,14 @@ jobs:
     strategy:
       matrix:
        include:
-        - python-version: 3.6
-          python-version-str: "py36"
-        - python-version: 3.7
+        - python-version: "3.7"
           python-version-str: "py37"
-        - python-version: 3.8
+        - python-version: "3.8"
           python-version-str: "py38"
-        - python-version: 3.9
+        - python-version: "3.9"
           python-version-str: "py39"
+        - python-version: "3.10"
+          python-version-str: "py310"
     steps:
       - uses: actions/checkout@v2
       - name: Set up ${{ matrix.python-version-str }}
@@ -38,6 +38,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_BLOB_STORAGE_ACCOUNT_URL: ${{ secrets.AZURE_BLOB_STORAGE_ACCOUNT_URL }}
+          AZURE_BLOB_STORAGE_HIERARCHICAL_ACCOUNT_URL: ${{ secrets.AZURE_BLOB_STORAGE_HIERARCHICAL_ACCOUNT_URL }}
           AZURE_TABLE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_TABLE_STORAGE_CONNECTION_STRING }}
           GCP_CREDENTIALS_BASE64: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
           GOOGLE_APPLICATION_CREDENTIALS: gcp.json
