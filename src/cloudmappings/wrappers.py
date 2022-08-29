@@ -1,14 +1,18 @@
+import inspect
+
 from .cloudstoragemapping import CloudMapping
 
 
 def _parse_cloud_mapping_kwargs(kwargs: dict):
-    cloud_mapping_kwargs = dict(
-        sync_initially=kwargs.pop("sync_initially", True),
-        read_blindly=kwargs.pop("read_blindly", False),
-        read_blindly_default=kwargs.pop("read_blindly_default", None),
-        ordered_dumps_funcs=kwargs.pop("ordered_dumps_funcs", None),
-        ordered_loads_funcs=kwargs.pop("ordered_loads_funcs", None),
-    )
+    # We inspect the CloudMapping.__init__ function to determine what kwargs
+    # it understands, and pull those out. The remaining kwargs are then passed
+    # to the storage provider.
+    cloud_mapping_kwargs = {
+        n: kwargs.pop(n) if n in kwargs else p.default
+        for n, p in inspect.signature(CloudMapping.__init__).parameters.items()
+        if n not in ["self", "storage_provider"]
+    }
+    print(cloud_mapping_kwargs)
     return cloud_mapping_kwargs, kwargs
 
 
