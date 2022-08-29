@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Callable, Dict, List, MutableMapping, Type
+from typing import Any, Callable, Dict, List, MutableMapping
 
 from .storageproviders.storageprovider import StorageProvider
 
@@ -81,9 +81,12 @@ class CloudMapping(MutableMapping):
         read_blindly : bool, default=False
             Whether to read blindly or not by default. See `read_blindly` attribute for more
             information
+        read_blindly_error : bool, default=False
+            Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
+            in the cloud
         read_blindly_default : Any, default=None
-            The value to return when read_blindly is enabled and the key does not have
-            a value in the cloud
+            The value to return when read_blindly is enabled, the key does not have a value in the
+            cloud, and read_blindly_error is `False`
         ordered_dumps_funcs : List[Callable], default=None
             An ordered list of functions to pass values through before saving bytes to the cloud.
             The last function must return a bytes-like object.
