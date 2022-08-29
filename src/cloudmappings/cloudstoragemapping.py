@@ -16,9 +16,12 @@ class CloudMapping(MutableMapping):
     read_blindly : bool, default=False
         Whether to read blindly or not by default. See `read_blindly` attribute for more
         information.
+    read_blindly_error : bool, default=False
+        Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
+        in the cloud.
     read_blindly_default : Any, default=None
-        The value to return when read_blindly is enabled and the key does not have
-        a value in the cloud.
+        The value to return when read_blindly is enabled, the key does not have a value in the
+        cloud, and read_blindly_error is `False`.
     ordered_dumps_funcs : List[Callable]
         An ordered list of functions to pass values through before saving bytes to the cloud.
         The last function must return a bytes-like object.
@@ -37,18 +40,24 @@ class CloudMapping(MutableMapping):
 
         When read blindly is `True`, a cloud-mapping will return the latest cloud version
         for any key accessed, including keys it has no prior knowledge of (ie not in it's etag
-        dict). If there is no value for a key in the cloud, the current value of
+        dict). If there is no value for a key in the cloud, whether a `KeyValue` error is
+        raised is controlled by the `read_blindly_error` flag. If `False`, the current value of
         `read_blindly_default` will be returned.
 
-        When read blindly is `True` a cloud-mapping will not raise `KeyValue` or
-        `cloudmappings.errors.KeySyncError` errors for read/get operations.
+        When read blindly is `True` a cloud-mapping will not raise `cloudmappings.errors.KeySyncError`
+        errors for read/get operations.
 
         By default a cloud-mapping is instantiated with read blindly set to `False`.
     """
 
+    read_blindly_error: bool
+    """Whether to raise a `KeyValue` error when read_blindly is `True` and the key does not have
+        a value in the cloud. If `True`, this takes prescedence over `read_blindly_default`.
+    """
+
     read_blindly_default: Any
-    """The value to return when read_blindly is `True` and the key does not have
-        a value in the cloud.
+    """The value to return when read_blindly is `True`, the key does not have a value in the cloud,
+        and read_blindly_error is `False`.
     """
 
     def __init__(
@@ -56,6 +65,7 @@ class CloudMapping(MutableMapping):
         storage_provider: StorageProvider,
         sync_initially: bool = True,
         read_blindly: bool = False,
+        read_blindly_error: bool = False,
         read_blindly_default: Any = None,
         ordered_dumps_funcs: List[Callable] = None,
         ordered_loads_funcs: List[Callable] = None,
@@ -71,9 +81,12 @@ class CloudMapping(MutableMapping):
         read_blindly : bool, default=False
             Whether to read blindly or not by default. See `read_blindly` attribute for more
             information
+        read_blindly_error : bool, default=False
+            Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
+            in the cloud
         read_blindly_default : Any, default=None
-            The value to return when read_blindly is enabled and the key does not have
-            a value in the cloud
+            The value to return when read_blindly is enabled, the key does not have a value in the
+            cloud, and read_blindly_error is `False`
         ordered_dumps_funcs : List[Callable], default=None
             An ordered list of functions to pass values through before saving bytes to the cloud.
             The last function must return a bytes-like object.
@@ -87,6 +100,7 @@ class CloudMapping(MutableMapping):
         self._ordered_loads_funcs = ordered_loads_funcs if ordered_loads_funcs is not None else []
 
         self.read_blindly = read_blindly
+        self.read_blindly_error = read_blindly_error
         self.read_blindly_default = read_blindly_default
 
         if self._storage_provider.create_if_not_exists() and sync_initially:
@@ -141,6 +155,8 @@ class CloudMapping(MutableMapping):
             key=self._encode_key(key), etag=None if self.read_blindly else self._etags[key]
         )
         if self.read_blindly and value is None:
+            if self.read_blindly_error:
+                raise KeyError(key)
             return self.read_blindly_default
         for loads in self._ordered_loads_funcs:
             value = loads(value)
