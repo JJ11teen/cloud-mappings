@@ -13,6 +13,8 @@ class WrapperTests:
             container_name=test_container_name,
             sync_initially=False,
             read_blindly=True,
+            read_blindly_error=False,
+            read_blindly_default=None,
         )
         assert len(cm.etags) == 0
         assert cm.read_blindly == True
@@ -32,6 +34,8 @@ class WrapperTests:
             table_name=test_container_name,
             sync_initially=False,
             read_blindly=True,
+            read_blindly_error=False,
+            read_blindly_default=None,
         )
         assert len(cm.etags) == 0
         assert cm.read_blindly == True
@@ -51,6 +55,8 @@ class WrapperTests:
             bucket_name=test_container_name,
             sync_initially=False,
             read_blindly=True,
+            read_blindly_error=False,
+            read_blindly_default=None,
         )
         assert len(cm.etags) == 0
         assert cm.read_blindly == True
@@ -69,6 +75,8 @@ class WrapperTests:
             bucket_name=test_container_name,
             sync_initially=False,
             read_blindly=True,
+            read_blindly_error=False,
+            read_blindly_default=None,
         )
         assert len(cm.etags) == 0
         assert cm.read_blindly == True
