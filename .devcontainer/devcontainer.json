@@ -8,7 +8,6 @@
 	},
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"terminal.integrated.defaultProfile.linux": "/bin/bash",
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.languageServer": "Pylance",
 		"python.linting.enabled": false,
@@ -21,21 +20,19 @@
 			"--section-default",
 			"THIRDPARTY",
 			"--project",
-			"src",
-			"--project",
-			"cloudmappings",
+			"src"
 		],
 		"[python]": {
 			"editor.codeActionsOnSave": {
-				"source.organizeImports": true,
-			},
-		},
+				"source.organizeImports": true
+			}
+		}
 	},
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
 		"ms-python.vscode-pylance",
-		"eamodio.gitlens",
+		"eamodio.gitlens"
 	],
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
