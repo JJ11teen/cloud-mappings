@@ -12,7 +12,6 @@ def _parse_cloud_mapping_kwargs(kwargs: dict):
         for n, p in inspect.signature(CloudMapping.__init__).parameters.items()
         if n not in ["self", "storage_provider"]
     }
-    print(cloud_mapping_kwargs)
     return cloud_mapping_kwargs, kwargs
 
 
