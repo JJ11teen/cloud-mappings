@@ -107,5 +107,5 @@ class AzureBlobStorageProvider(StorageProvider):
         return {
             b.name: b.etag
             for b in self._container_client.list_blobs(name_starts_with=key_prefix)
-            if b.content_settings.content_type is not None and b.content_settings.content_md5 is not None
+            if b.content_settings.content_type is not None or b.content_settings.content_md5 is not None
         }
