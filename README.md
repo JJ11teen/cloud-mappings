@@ -1,5 +1,5 @@
 # cloud-mappings
-MutableMapping implementations for common cloud storage providers - use a dictionary to store & access files in the cloud!
+MutableMapping implementations for common cloud storage providers - the power of cloud storage behind the simplicity of a dictionary interface!
 
 [![Build](https://github.com/JJ11teen/cloud-mappings/actions/workflows/build.yaml/badge.svg)](https://github.com/JJ11teen/cloud-mappings/actions/workflows/build.yaml)
 [![PyPI version](https://badge.fury.io/py/cloud-mappings.svg)](https://pypi.org/project/cloud-mappings/)
