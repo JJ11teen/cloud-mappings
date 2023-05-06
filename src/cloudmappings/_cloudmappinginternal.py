@@ -15,7 +15,7 @@ class CloudMappingInternal(CloudMapping[T]):
 
     def _encode_key(self, unsafe_key: str) -> str:
         if not isinstance(unsafe_key, str):
-            raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
+            raise TypeError(f"Key must be of type 'str'. Got key of type: {type(unsafe_key)}")
         with_prefix = self._key_prefix + unsafe_key if self._key_prefix else unsafe_key
         return self._storage_provider.encode_key(unsafe_key=with_prefix)
 

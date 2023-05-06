@@ -152,11 +152,14 @@ class CloudMappingUtilityTests:
         key_with_prefix = key_prefix + key
 
         cm_root[key] = 1
-        cm_sub[key] = "sub"  # Won't raise error as no clash
+        # Set from subdirectory
+        cm_sub[key] = "sub"  # Won't raise error as different key
 
+        # Get from root
         cm_root.sync_with_cloud(key_with_prefix)
         assert cm_root[key_with_prefix] == "sub"
 
+        # Override from root and get from subdirectory
         cm_root[key_with_prefix] = "root"
         cm_sub.sync_with_cloud(key)
         assert cm_sub[key] == "root"

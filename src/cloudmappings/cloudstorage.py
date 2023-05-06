@@ -23,7 +23,7 @@ class CloudStorage:
         read_blindly_error: bool = False,
         read_blindly_default: Any = None,
         serialisation: CloudMappingSerialisation[T] = Serialisers.pickle(),
-        key_prefix: Optional[Callable[[str], str]] = None,
+        key_prefix: Optional[str] = None,
     ) -> CloudMapping[T]:
         """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
 
