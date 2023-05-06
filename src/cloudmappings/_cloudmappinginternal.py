@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Iterator, Optional, TypeVar
+from typing import Dict, Iterator, Optional, TypeVar
 
 from cloudmappings.cloudmapping import CloudMapping
 from cloudmappings.serialisation import CloudMappingSerialisation
@@ -11,13 +11,13 @@ class CloudMappingInternal(CloudMapping[T]):
     _storage_provider: StorageProvider
     _etags: Dict[str, str]
     _serialisation: CloudMappingSerialisation[T]
-    _key_mapper: Optional[Callable[[str], str]]
+    _key_prefix: Optional[str]
 
     def _encode_key(self, unsafe_key: str) -> str:
         if not isinstance(unsafe_key, str):
             raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
-        mapped_key = self._key_mapper(unsafe_key) if self._key_mapper else unsafe_key
-        return self._storage_provider.encode_key(unsafe_key=mapped_key)
+        with_prefix = self._key_prefix + unsafe_key if self._key_prefix else unsafe_key
+        return self._storage_provider.encode_key(unsafe_key=with_prefix)
 
     def sync_with_cloud(self, key_prefix: str = "") -> None:
         key_prefix = self._encode_key(key_prefix)
@@ -35,6 +35,10 @@ class CloudMappingInternal(CloudMapping[T]):
     @property
     def serialisation(self) -> CloudMappingSerialisation:
         return self._serialisation
+
+    @property
+    def key_prefix(self) -> str:
+        return self._key_prefix
 
     def __getitem__(self, key: str) -> T:
         if not self.read_blindly and key not in self._etags:

@@ -23,7 +23,7 @@ class CloudStorage:
         read_blindly_error: bool = False,
         read_blindly_default: Any = None,
         serialisation: CloudMappingSerialisation[T] = Serialisers.pickle(),
-        key_mapper: Optional[Callable[[str], str]] = None,
+        key_prefix: Optional[Callable[[str], str]] = None,
     ) -> CloudMapping[T]:
         """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
 
@@ -44,14 +44,15 @@ class CloudStorage:
             cloud, and read_blindly_error is `False`.
         serialiser : CloudMappingSerialiser
             CloudMappingSerialiser to use, defaults to `pickle`.
-        key_mapper : Callable[[str], str], default=None
-            Mapping function to apply to keys between local mapping and cloud storage.
+        key_prefix : Optional[str], default=None
+            Prefix to apply to keys in cloud storage. Enables mappings to be a subdirectory within a
+            cloud storage service.
         """
         mapping = CloudMappingInternal()
         mapping._storage_provider = self.storage_provider
         mapping._etags = {}
         mapping._serialisation = serialisation
-        mapping._key_mapper = key_mapper
+        mapping._key_prefix = key_prefix
 
         mapping.read_blindly = read_blindly
         mapping.read_blindly_error = read_blindly_error

@@ -142,3 +142,21 @@ class CloudMappingUtilityTests:
 
         cm.read_blindly_default = 0
         assert cm[key] == 0
+
+    def test_key_prefix(self, cloud_storage: CloudStorage, test_id: str):
+        key_prefix = "keyprefix/"
+        cm_root = cloud_storage.create_mapping(sync_initially=False)
+        cm_sub = cloud_storage.create_mapping(sync_initially=False, key_prefix=key_prefix)
+
+        key = test_id + "key-prefix-key"
+        key_with_prefix = key_prefix + key
+
+        cm_root[key] = 1
+        cm_sub[key] = "sub"  # Won't raise error as no clash
+
+        cm_root.sync_with_cloud(key_with_prefix)
+        assert cm_root[key_with_prefix] == "sub"
+
+        cm_root[key_with_prefix] = "root"
+        cm_sub.sync_with_cloud(key)
+        assert cm_sub[key] == "root"

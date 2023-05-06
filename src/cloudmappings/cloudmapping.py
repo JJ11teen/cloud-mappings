@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, MutableMapping, TypeVar
+from typing import Any, Dict, MutableMapping, Optional, TypeVar
 
 from cloudmappings.serialisation import CloudMappingSerialisation
 
@@ -47,7 +47,7 @@ class CloudMapping(MutableMapping[str, T], ABC):
 
         This allows a cloud-mapping to reflect the most recent updates to the cloud resource,
         including those made by other instances or users. This can allow destructive operations
-        as a user may sync to get the latest updates, and then overwrite or delete keys.
+        as a user may sync to get the latest updates, and then overwrite or delete items.
 
         Consider calling this if you are encountering a `cloudmappings.errors.KeySyncError`,
         and you are sure you would like to force the operation anyway.
@@ -57,7 +57,8 @@ class CloudMapping(MutableMapping[str, T], ABC):
         Parameters
         ----------
         key_prefix : str, optional
-            Only sync keys beginning with the specified prefix
+            Only sync keys beginning with the specified prefix, the key prefix configured on the
+            mapping is prepended as well.
         """
         pass
 
@@ -80,3 +81,8 @@ class CloudMapping(MutableMapping[str, T], ABC):
         """Gets the serialiser the mapping is configured to use for serialising and
         deserialising values."""
         pass
+
+    @property
+    @abstractmethod
+    def key_prefix(self) -> Optional[str]:
+        """Gets the key prefix the mapping is configured to apply to items in cloud storage"""
