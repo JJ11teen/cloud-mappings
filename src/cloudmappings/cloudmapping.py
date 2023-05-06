@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, MutableMapping, TypeVar
+from typing import Any, Dict, MutableMapping, TypeVar
 
 from cloudmappings.serialisation import CloudMappingSerialisation
 
 T = TypeVar("T")
 
 
-class CloudMapping(MutableMapping[str, T], Generic[T], ABC):
+class CloudMapping(MutableMapping[str, T], ABC):
     """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
     Implements the `MutableMapping` interface, can be used just as a standard `dict()`.
     """
@@ -63,7 +63,7 @@ class CloudMapping(MutableMapping[str, T], Generic[T], ABC):
 
     @property
     @abstractmethod
-    def etags(self) -> Dict:
+    def etags(self) -> Dict[str, str]:
         """An internal dictionary of etags used to ensure the cloud-mapping is in sync with
         the cloud storage resource. The dict is itself a mapping, mapping keys to their etags.
 
@@ -76,7 +76,7 @@ class CloudMapping(MutableMapping[str, T], Generic[T], ABC):
 
     @property
     @abstractmethod
-    def serialisation(self) -> CloudMappingSerialisation:
+    def serialisation(self) -> CloudMappingSerialisation[T]:
         """Gets the serialiser the mapping is configured to use for serialising and
         deserialising values."""
         pass

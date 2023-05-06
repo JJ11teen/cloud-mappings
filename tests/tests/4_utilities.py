@@ -5,14 +5,14 @@ import zlib
 import pytest
 
 from cloudmappings.cloudstorage import CloudStorage
-from cloudmappings.serialisation import BuiltinSerialisers
+from cloudmappings.serialisation import Serialisers
 
 
 class CloudMappingUtilityTests:
     def test_pickle_is_default(self, cloud_storage: CloudStorage, test_id: str):
         cm = cloud_storage.create_mapping(sync_initially=False)
 
-        assert cm.serialisation == BuiltinSerialisers.pickle()
+        assert cm.serialisation == Serialisers.pickle()
 
     def test_no_serialisation(self, cloud_storage: CloudStorage, test_id: str):
         cm = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
@@ -39,7 +39,7 @@ class CloudMappingUtilityTests:
         assert cm[test_id + "empty-key"] is None
 
     def test_with_pickle(self, cloud_storage: CloudStorage, test_id: str):
-        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=BuiltinSerialisers.pickle())
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=Serialisers.pickle())
 
         load_key = test_id + "with-pickle-loads"
         dump_key = test_id + "with-pickle-dumps"
@@ -62,7 +62,7 @@ class CloudMappingUtilityTests:
         assert cm[test_id + "empty-key"] is None
 
     def test_with_raw_string(self, cloud_storage: CloudStorage, test_id: str):
-        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=BuiltinSerialisers.raw_string())
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=Serialisers.raw_string())
 
         load_key = test_id + "with-raw-string-loads"
         dump_key = test_id + "with-raw-string-dumps"
@@ -85,7 +85,7 @@ class CloudMappingUtilityTests:
         assert cm[test_id + "empty-key"] is None
 
     def test_with_json(self, cloud_storage: CloudStorage, test_id: str):
-        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=BuiltinSerialisers.json())
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=Serialisers.json())
 
         load_key = test_id + "with-json-loads"
         dump_key = test_id + "with-json-dumps"
@@ -108,7 +108,7 @@ class CloudMappingUtilityTests:
         assert cm[test_id + "empty-key"] is None
 
     def test_with_json_zlib(self, cloud_storage: CloudStorage, test_id: str):
-        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=BuiltinSerialisers.json_zlib())
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=Serialisers.json_zlib())
 
         load_key = test_id + "with-json-zlib-loads"
         dump_key = test_id + "with-json-zlib-dumps"
