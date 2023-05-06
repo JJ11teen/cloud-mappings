@@ -20,8 +20,6 @@ jobs:
           python-version-str: "py310"
         - python-version: "3.11"
           python-version-str: "py311"
-        - python-version: "3.12"
-          python-version-str: "py312"
     steps:
       - uses: actions/checkout@v2
       - name: Set up ${{ matrix.python-version-str }}
