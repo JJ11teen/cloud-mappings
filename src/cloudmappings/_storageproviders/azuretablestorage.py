@@ -129,7 +129,7 @@ class AzureTableStorageProvider(StorageProvider):
                 raise e
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
-        if key_prefix is None:
+        if key_prefix:
             query = self._table_client.list_entities()
         else:
             key_prefix_stop = key_prefix[:-1] + chr(ord(key_prefix[-1]) + 1)

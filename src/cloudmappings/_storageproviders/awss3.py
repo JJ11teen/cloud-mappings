@@ -117,6 +117,6 @@ class AWSS3Provider(StorageProvider):
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         bucket = boto3.resource("s3").Bucket(self._bucket_name)
         kwargs = {}
-        if key_prefix is not None:
+        if key_prefix:
             kwargs["Prefix"] = key_prefix
         return {o.key: o.Object().metadata[_metadata_etag_key] for o in bucket.objects.filter(**kwargs)}
