@@ -13,19 +13,22 @@ class CloudMappingInternal(CloudMapping[T]):
     _serialisation: CloudMappingSerialisation[T]
     _key_prefix: Optional[str]
 
-    def _encode_key(self, unsafe_key: str) -> str:
-        if not isinstance(unsafe_key, str):
-            raise TypeError(f"Key must be of type 'str'. Got key of type: {type(unsafe_key)}")
-        with_prefix = self._key_prefix + unsafe_key if self._key_prefix else unsafe_key
+    def _encode_key(self, mapping_key: str) -> str:
+        if not isinstance(mapping_key, str):
+            raise TypeError(f"Key must be of type 'str'. Got key of type: {type(mapping_key)}")
+        with_prefix = self._key_prefix + mapping_key if self._key_prefix else mapping_key
         return self._storage_provider.encode_key(unsafe_key=with_prefix)
+
+    def _decode_key(self, key_from_provider: str) -> str:
+        decoded = self._storage_provider.decode_key(key_from_provider)
+        if self._key_prefix and decoded.startswith(self._key_prefix):
+            decoded = decoded[len(self._key_prefix) :]
+        return decoded
 
     def sync_with_cloud(self, key_prefix: str = "") -> None:
         key_prefix = self._encode_key(key_prefix)
         self._etags.update(
-            {
-                self._storage_provider.decode_key(k): i
-                for k, i in self._storage_provider.list_keys_and_etags(key_prefix).items()
-            }
+            {self._decode_key(k): i for k, i in self._storage_provider.list_keys_and_etags(key_prefix).items()}
         )
 
     @property
@@ -33,7 +36,7 @@ class CloudMappingInternal(CloudMapping[T]):
         return self._etags
 
     @property
-    def serialisation(self) -> CloudMappingSerialisation:
+    def serialisation(self) -> CloudMappingSerialisation[T]:
         return self._serialisation
 
     @property
