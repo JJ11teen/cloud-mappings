@@ -1,4 +1,4 @@
-from typing import Any, Dict, TypeVar
+from typing import Callable, Dict, Iterator, Optional, TypeVar
 
 from cloudmappings.cloudmapping import CloudMapping
 from cloudmappings.serialisation import CloudMappingSerialisation
@@ -10,15 +10,17 @@ T = TypeVar("T")
 class CloudMappingInternal(CloudMapping[T]):
     _storage_provider: StorageProvider
     _etags: Dict[str, str]
-    _serialisation: CloudMappingSerialisation
+    _serialisation: CloudMappingSerialisation[T]
+    _key_mapper: Optional[Callable[[str], str]]
 
     def _encode_key(self, unsafe_key: str) -> str:
         if not isinstance(unsafe_key, str):
             raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
-        return self._storage_provider.encode_key(unsafe_key=unsafe_key)
+        mapped_key = self._key_mapper(unsafe_key) if self._key_mapper else unsafe_key
+        return self._storage_provider.encode_key(unsafe_key=mapped_key)
 
-    def sync_with_cloud(self, key_prefix: str = None) -> None:
-        key_prefix = None if key_prefix is None else self._encode_key(key_prefix)
+    def sync_with_cloud(self, key_prefix: str = "") -> None:
+        key_prefix = self._encode_key(key_prefix)
         self._etags.update(
             {
                 self._storage_provider.decode_key(k): i
@@ -27,14 +29,14 @@ class CloudMappingInternal(CloudMapping[T]):
         )
 
     @property
-    def etags(self) -> Dict:
+    def etags(self) -> Dict[str, str]:
         return self._etags
 
     @property
     def serialisation(self) -> CloudMappingSerialisation:
         return self._serialisation
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> T:
         if not self.read_blindly and key not in self._etags:
             raise KeyError(key)
         value = self._storage_provider.download_data(
@@ -48,7 +50,7 @@ class CloudMappingInternal(CloudMapping[T]):
             value = self._serialisation.loads(value)
         return value
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: str, value: T) -> None:
         if self._serialisation:
             value = self._serialisation.dumps(value)
         self._etags[key] = self._storage_provider.upload_data(
@@ -66,7 +68,7 @@ class CloudMappingInternal(CloudMapping[T]):
     def __contains__(self, key: str) -> bool:
         return key in self._etags
 
-    def keys(self):
+    def keys(self) -> Iterator[str]:
         return iter(self._etags.keys())
 
     __iter__ = keys

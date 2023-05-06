@@ -1,9 +1,11 @@
-from typing import Any
+from typing import Any, Callable, Optional, TypeVar
 
 from cloudmappings._cloudmappinginternal import CloudMappingInternal
 from cloudmappings.cloudmapping import CloudMapping
-from cloudmappings.serialisation import BuiltinSerialisers, CloudMappingSerialisation
+from cloudmappings.serialisation import CloudMappingSerialisation, Serialisers
 from cloudmappings.storageprovider import StorageProvider
+
+T = TypeVar("T")
 
 
 class CloudStorage:
@@ -20,8 +22,9 @@ class CloudStorage:
         read_blindly: bool = False,
         read_blindly_error: bool = False,
         read_blindly_default: Any = None,
-        serialisation: CloudMappingSerialisation = BuiltinSerialisers.pickle(),
-    ) -> CloudMapping:
+        serialisation: CloudMappingSerialisation[T] = Serialisers.pickle(),
+        key_mapper: Optional[Callable[[str], str]] = None,
+    ) -> CloudMapping[T]:
         """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
 
         Parameters
@@ -41,11 +44,14 @@ class CloudStorage:
             cloud, and read_blindly_error is `False`.
         serialiser : CloudMappingSerialiser
             CloudMappingSerialiser to use, defaults to `pickle`.
+        key_mapper : Callable[[str], str], default=None
+            Mapping function to apply to keys between local mapping and cloud storage.
         """
         mapping = CloudMappingInternal()
         mapping._storage_provider = self.storage_provider
         mapping._etags = {}
         mapping._serialisation = serialisation
+        mapping._key_mapper = key_mapper
 
         mapping.read_blindly = read_blindly
         mapping.read_blindly_error = read_blindly_error

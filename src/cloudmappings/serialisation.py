@@ -1,8 +1,12 @@
+from dataclasses import dataclass
 from functools import partial, reduce
-from typing import Callable, List, NamedTuple
+from typing import Any, Callable, Generic, List, TypeVar
+
+T = TypeVar("T")
 
 
-class CloudMappingSerialisation(NamedTuple):
+@dataclass(frozen=True)
+class CloudMappingSerialisation(Generic[T]):
     """A combination of a dumps and a loads function, to control serialisation of objects
     through a CloudMapping instance
 
@@ -14,9 +18,9 @@ class CloudMappingSerialisation(NamedTuple):
         Must expect a bytes-like object as its input.
     """
 
-    dumps: Callable
+    dumps: Callable[[T], bytes]
     """Function to dump values through when writing to the cloud. Must return a bytes-like object."""
-    loads: Callable
+    loads: Callable[[bytes], T]
     """Function to load values through when reading from the cloud. Must expect a bytes-like object as its input."""
 
     def __bool__(self) -> bool:
@@ -34,7 +38,7 @@ class CloudMappingSerialisation(NamedTuple):
     def from_chain(
         ordered_dumps_funcs: List[Callable],
         ordered_loads_funcs: List[Callable],
-    ) -> "CloudMappingSerialisation":
+    ) -> "CloudMappingSerialisation[T]":
         """Creates a CloudMappingSerialisation by chaining consecutive dumps and loads functions together
 
         Parameters
@@ -61,8 +65,21 @@ class CloudMappingSerialisation(NamedTuple):
         )
 
 
-class BuiltinSerialisers:
-    def pickle(protocol: int = None) -> CloudMappingSerialisation:
+class Serialisers:
+    def none() -> CloudMappingSerialisation[bytes]:
+        """This serialiser performs no serialisation, and accesses raw bytes
+
+        It is implemented as `None`, and `None` can be used directly, however
+        using this serialiser enables type hints to correctly pick up `bytes`
+        as the mapping value.
+
+        Returns
+        CloudMappingSerialisation
+            None, typed as CloudMappingSerialisation[bytes]
+        """
+        return None
+
+    def pickle(protocol: int = None) -> CloudMappingSerialisation[Any]:
         """Serialiser that pickles values using pythons `pickle`
 
         Parameters
@@ -82,7 +99,7 @@ class BuiltinSerialisers:
             loads=pickle.loads,
         )
 
-    def raw_string(encoding: str = "utf-8") -> CloudMappingSerialisation:
+    def raw_string(encoding: str = "utf-8") -> CloudMappingSerialisation[str]:
         """Serialiser that only encodes raw string values
 
         Returns
@@ -95,7 +112,7 @@ class BuiltinSerialisers:
             loads=partial(str, encoding=encoding),
         )
 
-    def json(encoding: str = "utf-8") -> CloudMappingSerialisation:
+    def json(encoding: str = "utf-8") -> CloudMappingSerialisation[Any]:
         """Serialises values to JSON strings
 
         Parameters
@@ -115,7 +132,7 @@ class BuiltinSerialisers:
             ordered_loads_funcs=[partial(str, encoding=encoding), json.loads],
         )
 
-    def json_zlib(encoding: str = "utf-8") -> CloudMappingSerialisation:
+    def json_zlib(encoding: str = "utf-8") -> CloudMappingSerialisation[Any]:
         """Serialises values to compressed JSON strings
 
         Uses zlib to compress values after serialising them JSON strings.
