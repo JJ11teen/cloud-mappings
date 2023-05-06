@@ -6,6 +6,8 @@ import boto3
 
 from .storageprovider import StorageProvider
 
+logger = logging.getLogger(__name__)
+
 _metadata_etag_key = "cloud-mappings-etag"
 
 
@@ -18,7 +20,7 @@ class AWSS3Provider(StorageProvider):
         self._client = boto3.client("s3")
         self._bucket_name = bucket_name
         if not silence_warning:
-            logging.warning(
+            logger.warning(
                 msg=(
                     "AWS S3 does not support server-side atomic requests, it is not recommended for concurrent use.\n",
                     "Consider using another provider such as Azure or GCP if you need concurrent access.\n",
