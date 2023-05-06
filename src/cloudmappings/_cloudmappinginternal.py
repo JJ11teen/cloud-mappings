@@ -1,7 +1,7 @@
 from typing import Dict, Iterator, Optional, TypeVar
 
 from cloudmappings.cloudmapping import CloudMapping
-from cloudmappings.serialisation import CloudMappingSerialisation
+from cloudmappings.serialisers import CloudMappingSerialisation
 from cloudmappings.storageprovider import StorageProvider
 
 T = TypeVar("T")

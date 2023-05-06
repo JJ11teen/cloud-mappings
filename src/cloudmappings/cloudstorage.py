@@ -1,8 +1,9 @@
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from cloudmappings._cloudmappinginternal import CloudMappingInternal
 from cloudmappings.cloudmapping import CloudMapping
-from cloudmappings.serialisation import CloudMappingSerialisation, Serialisers
+from cloudmappings.serialisers import CloudMappingSerialisation
+from cloudmappings.serialisers.default import pickle
 from cloudmappings.storageprovider import StorageProvider
 
 T = TypeVar("T")
@@ -22,7 +23,7 @@ class CloudStorage:
         read_blindly: bool = False,
         read_blindly_error: bool = False,
         read_blindly_default: Any = None,
-        serialisation: CloudMappingSerialisation[T] = Serialisers.pickle(),
+        serialisation: CloudMappingSerialisation[T] = pickle(),
         key_prefix: Optional[str] = None,
     ) -> CloudMapping[T]:
         """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.

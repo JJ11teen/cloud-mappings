@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, MutableMapping, Optional, TypeVar
 
-from cloudmappings.serialisation import CloudMappingSerialisation
+from cloudmappings.serialisers import CloudMappingSerialisation
 
 T = TypeVar("T")
 
