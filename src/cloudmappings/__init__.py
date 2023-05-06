@@ -1,17 +1,16 @@
 from cloudmappings.cloudmapping import CloudMapping
-
-from cloudmappings.wrappers import (
-    AWSS3Mapping,
-    AzureBlobMapping,
-    AzureTableMapping,
-    GoogleCloudStorageMapping,
+from cloudmappings.cloudstorage import (
+    AWSS3Storage,
+    AzureBlobStorage,
+    AzureTableStorage,
+    GoogleCloudStorage,
 )
 
 __all__ = [
     "CloudMapping",
-    "AzureBlobMapping",
-    "AzureTableMapping",
-    "GoogleCloudStorageMapping",
-    "AWSS3Mapping",
+    "AWSS3Storage",
+    "AzureBlobStorage",
+    "AzureTableStorage",
+    "GoogleCloudStorage",
 ]
 __version__ = "2.0.0"

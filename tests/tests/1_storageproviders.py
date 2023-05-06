@@ -1,7 +1,7 @@
 import pytest
 
 from cloudmappings.errors import KeySyncError
-from cloudmappings.storageproviders.storageprovider import StorageProvider
+from cloudmappings.storageprovider import StorageProvider
 
 
 class StorageProviderTests:

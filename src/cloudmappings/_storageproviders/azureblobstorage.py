@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Any, Dict
 
 from azure.core import MatchConditions
 from azure.core.exceptions import (
@@ -7,18 +7,18 @@ from azure.core.exceptions import (
     ResourceModifiedError,
     ResourceNotFoundError,
 )
-from azure.identity import DefaultAzureCredential
 from azure.storage.blob import ContainerClient
 
-from .storageprovider import StorageProvider
+from cloudmappings.errors import KeySyncError
+from cloudmappings.storageprovider import StorageProvider
 
 
 class AzureBlobStorageProvider(StorageProvider):
     def __init__(
         self,
         container_name: str,
+        credential: Any,
         account_url: str = None,
-        credential=DefaultAzureCredential(),
         connection_string: str = None,
         create_container_metadata=None,
     ) -> None:
@@ -60,15 +60,15 @@ class AzureBlobStorageProvider(StorageProvider):
         try:
             return self._container_client.download_blob(**args).readall()
         except ResourceModifiedError as e:
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
         except ResourceNotFoundError as e:
             if etag is None:
                 return None
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         if not isinstance(data, bytes):
-            raise ValueError("Data must be bytes like")
+            raise ValueError(f"Data must be bytes like, got {type(data)}")
         expecting_blob = etag is not None
         args = dict(overwrite=expecting_blob)
         if expecting_blob:
@@ -85,7 +85,7 @@ class AzureBlobStorageProvider(StorageProvider):
                 **args,
             )
         except (ResourceExistsError, ResourceModifiedError) as e:
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
         return json.loads(response["etag"])
 
     def delete_data(self, key: str, etag: str) -> None:
@@ -96,7 +96,7 @@ class AzureBlobStorageProvider(StorageProvider):
                 match_condition=MatchConditions.IfNotModified,
             )
         except ResourceModifiedError as e:
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
         # If the container has hierarchical namespaces enabled, this call

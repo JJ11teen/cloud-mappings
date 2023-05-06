@@ -1,33 +1,14 @@
-from functools import partial
-from typing import Any, Callable, Dict, List, MutableMapping
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Generic, MutableMapping, TypeVar
 
-from .storageproviders.storageprovider import StorageProvider
+from cloudmappings.serialisation import CloudMappingSerialisation
+
+T = TypeVar("T")
 
 
-class CloudMapping(MutableMapping):
+class CloudMapping(MutableMapping[str, T], Generic[T], ABC):
     """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
-
-    Parameters
-    ----------
-    storage_provider : StorageProvider
-        The storage provider to use as the backing for the cloud-mapping.
-    sync_initially : bool, default=True
-        Whether to call `sync_with_cloud` initially
-    read_blindly : bool, default=False
-        Whether to read blindly or not by default. See `read_blindly` attribute for more
-        information.
-    read_blindly_error : bool, default=False
-        Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
-        in the cloud.
-    read_blindly_default : Any, default=None
-        The value to return when read_blindly is enabled, the key does not have a value in the
-        cloud, and read_blindly_error is `False`.
-    ordered_dumps_funcs : List[Callable]
-        An ordered list of functions to pass values through before saving bytes to the cloud.
-        The last function must return a bytes-like object.
-    ordered_loads_funcs : List[Callable]
-        An ordered list of functions to pass values through before saving bytes to the cloud.
-        The first function must expect a bytes-like object as its input.
+    Implements the `MutableMapping` interface, can be used just as a standard `dict()`.
     """
 
     read_blindly: bool
@@ -60,57 +41,7 @@ class CloudMapping(MutableMapping):
         and read_blindly_error is `False`.
     """
 
-    def __init__(
-        self,
-        storage_provider: StorageProvider,
-        sync_initially: bool = True,
-        read_blindly: bool = False,
-        read_blindly_error: bool = False,
-        read_blindly_default: Any = None,
-        ordered_dumps_funcs: List[Callable] = None,
-        ordered_loads_funcs: List[Callable] = None,
-    ) -> None:
-        """A cloud-mapping, a `MutableMapping` implementation backed by common cloud storage solutions.
-
-        Parameters
-        ----------
-        storage_provider : StorageProvider
-            The storage provider to use as the backing for the cloud-mapping.
-        sync_initially : bool, default=True
-            Whether to call `sync_with_cloud` initially
-        read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `read_blindly` attribute for more
-            information
-        read_blindly_error : bool, default=False
-            Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
-            in the cloud
-        read_blindly_default : Any, default=None
-            The value to return when read_blindly is enabled, the key does not have a value in the
-            cloud, and read_blindly_error is `False`
-        ordered_dumps_funcs : List[Callable], default=None
-            An ordered list of functions to pass values through before saving bytes to the cloud.
-            The last function must return a bytes-like object.
-        ordered_loads_funcs : List[Callable], default=None
-            An ordered list of functions to pass values through before saving bytes to the cloud.
-            The first function must expect a bytes-like object as its input.
-        """
-        self._storage_provider = storage_provider
-        self._etags = {}
-        self._ordered_dumps_funcs = ordered_dumps_funcs if ordered_dumps_funcs is not None else []
-        self._ordered_loads_funcs = ordered_loads_funcs if ordered_loads_funcs is not None else []
-
-        self.read_blindly = read_blindly
-        self.read_blindly_error = read_blindly_error
-        self.read_blindly_default = read_blindly_default
-
-        if self._storage_provider.create_if_not_exists() and sync_initially:
-            self.sync_with_cloud()
-
-    def _encode_key(self, unsafe_key: str) -> str:
-        if not isinstance(unsafe_key, str):
-            raise TypeError("Key must be of type 'str'. Got key:", unsafe_key)
-        return self._storage_provider.encode_key(unsafe_key=unsafe_key)
-
+    @abstractmethod
     def sync_with_cloud(self, key_prefix: str = None) -> None:
         """Synchronise this cloud-mapping's etags with the cloud.
 
@@ -128,15 +59,10 @@ class CloudMapping(MutableMapping):
         key_prefix : str, optional
             Only sync keys beginning with the specified prefix
         """
-        key_prefix = None if key_prefix is None else self._encode_key(key_prefix)
-        self._etags.update(
-            {
-                self._storage_provider.decode_key(k): i
-                for k, i in self._storage_provider.list_keys_and_etags(key_prefix).items()
-            }
-        )
+        pass
 
     @property
+    @abstractmethod
     def etags(self) -> Dict:
         """An internal dictionary of etags used to ensure the cloud-mapping is in sync with
         the cloud storage resource. The dict is itself a mapping, mapping keys to their etags.
@@ -146,141 +72,11 @@ class CloudMapping(MutableMapping):
 
         See: https://en.wikipedia.org/wiki/HTTP_ETag
         """
-        return self._etags
+        pass
 
-    def __getitem__(self, key: str) -> Any:
-        if not self.read_blindly and key not in self._etags:
-            raise KeyError(key)
-        value = self._storage_provider.download_data(
-            key=self._encode_key(key), etag=None if self.read_blindly else self._etags[key]
-        )
-        if self.read_blindly and value is None:
-            if self.read_blindly_error:
-                raise KeyError(key)
-            return self.read_blindly_default
-        for loads in self._ordered_loads_funcs:
-            value = loads(value)
-        return value
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        for dumps in self._ordered_dumps_funcs:
-            value = dumps(value)
-        self._etags[key] = self._storage_provider.upload_data(
-            key=self._encode_key(key),
-            etag=self._etags.get(key, None),
-            data=value,
-        )
-
-    def __delitem__(self, key: str) -> None:
-        if key not in self._etags:
-            raise KeyError(key)
-        self._storage_provider.delete_data(key=self._encode_key(key), etag=self._etags[key])
-        del self._etags[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self._etags
-
-    def keys(self):
-        return iter(self._etags.keys())
-
-    __iter__ = keys
-
-    def __len__(self) -> int:
-        return len(self._etags)
-
-    def __repr__(self) -> str:
-        return f"cloudmapping<{self._storage_provider.logical_name()}>"
-
-    @classmethod
-    def with_pickle(cls, *args, **kwargs) -> "CloudMapping":
-        """Create a cloud-mapping instance that pickles values using pythons `pickle`
-
-        Parameters
-        ----------
-        *args : tuple, optional
-            Additional positional arguments to pass to the CloudMapping constructor
-        **kwargs : dict, optional
-            Additional keyword arguments to pass to the CloudMapping constructor
-
-        Returns
-        -------
-        CloudMapping
-            A new cloud-mapping setup with pickle serialisation
-        """
-        import pickle
-
-        kwargs.update(
-            dict(
-                ordered_dumps_funcs=[pickle.dumps],
-                ordered_loads_funcs=[pickle.loads],
-            )
-        )
-        return cls(*args, **kwargs)
-
-    @classmethod
-    def with_json(cls, encoding="utf-8", *args, **kwargs) -> "CloudMapping":
-        """Create a cloud-mapping instance that serialises values to JSON strings
-
-        Parameters
-        ----------
-        encoding : str, default="utf-8"
-            The string encoding to use, passed to bytes() and str() for dumps and loads respectively.
-        *args : tuple, optional
-            Additional positional arguments to pass to the CloudMapping constructor
-        **kwargs : dict, optional
-            Additional keyword arguments to pass to the CloudMapping constructor
-
-        Returns
-        -------
-        CloudMapping
-            A new cloud-mapping setup with JSON string serialisation
-        """
-        import json
-
-        kwargs.update(
-            dict(
-                ordered_dumps_funcs=[partial(json.dumps, sort_keys=True), partial(bytes, encoding=encoding)],
-                ordered_loads_funcs=[partial(str, encoding=encoding), json.loads],
-            )
-        )
-        return cls(*args, **kwargs)
-
-    @classmethod
-    def with_json_zlib(cls, encoding="utf-8", *args, **kwargs) -> "CloudMapping":
-        """Create a cloud-mapping instance that serialises values to compressed JSON strings
-
-        Uses zlib to compress values after serialising them JSON strings.
-
-        Parameters
-        ----------
-        encoding : str, default="utf-8"
-            The string encoding to use, passed to bytes() and str() for dumps and loads
-            respectively.
-        *args : tuple, optional
-            Additional positional arguments to pass to the CloudMapping constructor
-        **kwargs : dict, optional
-            Additional keyword arguments to pass to the CloudMapping constructor
-
-        Returns
-        -------
-        CloudMapping
-            A new cloud-mapping setup with zlib compression and JSON string serialisation
-        """
-        import json
-        import zlib
-
-        kwargs.update(
-            dict(
-                ordered_dumps_funcs=[
-                    partial(json.dumps, sort_keys=True),
-                    partial(bytes, encoding=encoding),
-                    zlib.compress,
-                ],
-                ordered_loads_funcs=[
-                    zlib.decompress,
-                    partial(str, encoding=encoding),
-                    json.loads,
-                ],
-            )
-        )
-        return cls(*args, **kwargs)
+    @property
+    @abstractmethod
+    def serialisation(self) -> CloudMappingSerialisation:
+        """Gets the serialiser the mapping is configured to use for serialising and
+        deserialising values."""
+        pass

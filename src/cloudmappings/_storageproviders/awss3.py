@@ -4,7 +4,8 @@ from uuid import uuid4
 
 import boto3
 
-from .storageprovider import StorageProvider
+from cloudmappings.errors import KeySyncError
+from cloudmappings.storageprovider import StorageProvider
 
 logger = logging.getLogger(__name__)
 
@@ -71,17 +72,17 @@ class AWSS3Provider(StorageProvider):
     def download_data(self, key: str, etag: str) -> bytes:
         body, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if etag is not None and (body is None or etag != existing_etag):
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         if body is None:
             return None
         return body.read()
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         if not isinstance(data, bytes):
-            raise ValueError("Data must be bytes like")
+            raise ValueError(f"Data must be bytes like, got {type(data)}")
         _, existing_etag, _ = self._get_body_etag_version_id_if_exists(key)
         if etag != existing_etag:
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         # Note: There is a race condition here:
         # If blob is changed after the etag is fetched but before the put_object call succeeds.
         # Currently, the S3 API does not appear to support any parameters that would enable server-side
@@ -101,7 +102,7 @@ class AWSS3Provider(StorageProvider):
     def delete_data(self, key: str, etag: str) -> None:
         body, existing_etag, version_id = self._get_body_etag_version_id_if_exists(key)
         if body is None or etag != existing_etag:
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         # Note: There is a race condition here:
         # If blob is changed after the etag is fetched but before the delete_object call succeeds.
         # Currently, the S3 API does not appear to support any parameters that would enable server-side

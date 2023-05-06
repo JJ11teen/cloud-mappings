@@ -1,14 +1,13 @@
 import pytest
 
-from cloudmappings.cloudstoragemapping import CloudMapping
+from cloudmappings.cloudstorage import CloudStorage
 from cloudmappings.errors import KeySyncError
-from cloudmappings.storageproviders.storageprovider import StorageProvider
 
 
 class ConcurrentCloudMappingTests:
-    def test_no_ownership_error(self, storage_provider: StorageProvider, test_id: str):
-        sess_1 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
-        sess_2 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+    def test_no_ownership_error(self, cloud_storage: CloudStorage, test_id: str):
+        sess_1 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
+        sess_2 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         key = test_id + "/concurrent/no-ownership-test"
 
         # Session 1 takes ownership of key:
@@ -22,7 +21,7 @@ class ConcurrentCloudMappingTests:
             del sess_2[key]
 
         # Session 3 is created after the key is created
-        sess_3 = CloudMapping(storage_provider=storage_provider)
+        sess_3 = cloud_storage.create_mapping()
         # Session 1 updates the key:
         sess_1[key] = b"session_1"
         # Session 3 knows the key exists, but is out of sync so KeySyncError on get, set and delete:
@@ -33,10 +32,10 @@ class ConcurrentCloudMappingTests:
         with pytest.raises(KeySyncError):
             del sess_3[key]
 
-    def test_blind_read(self, storage_provider: StorageProvider, test_id: str):
-        sess_1 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
-        sess_2 = CloudMapping(storage_provider=storage_provider, sync_initially=False, read_blindly=True)
-        sess_3 = CloudMapping(storage_provider=storage_provider, sync_initially=False, read_blindly=False)
+    def test_blind_read(self, cloud_storage: CloudStorage, test_id: str):
+        sess_1 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
+        sess_2 = cloud_storage.create_mapping(sync_initially=False, read_blindly=True, serialisation=None)
+        sess_3 = cloud_storage.create_mapping(sync_initially=False, read_blindly=False, serialisation=None)
         key = test_id + "/concurrent/blind-get-test"
 
         # Session 1 uploads data:
@@ -54,15 +53,15 @@ class ConcurrentCloudMappingTests:
         sess_3.read_blindly = True
         assert sess_3[key] == b"data"
 
-    def test_manual_change_error(self, storage_provider: StorageProvider, test_id: str):
-        cm = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+    def test_manual_change_error(self, cloud_storage: CloudStorage, test_id: str):
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         key = test_id + "/concurrent/manual-change-test"
-        encoded_key = storage_provider.encode_key(key)
+        encoded_key = cloud_storage.storage_provider.encode_key(key)
 
         # Session 1 takes ownership of key:
         cm[key] = b"session_1"
         # The blob is changed by some manual means:
-        storage_provider.upload_data(encoded_key, cm.etags[key], b"other")
+        cloud_storage.storage_provider.upload_data(encoded_key, cm.etags[key], b"other")
         # Session 1 now gets a KeySyncError on read, delete, and set:
         with pytest.raises(KeySyncError):
             cm[key]
@@ -71,12 +70,12 @@ class ConcurrentCloudMappingTests:
         with pytest.raises(KeySyncError):
             del cm[key]
 
-    def test_resync_all(self, storage_provider: StorageProvider, test_id: str):
-        sess_1 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+    def test_resync_all(self, cloud_storage: CloudStorage, test_id: str):
+        sess_1 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         key_1 = test_id + "/concurrent/resync-all-test-1"
         key_2 = test_id + "/concurrent/resync-all-test-2"
         key_3 = test_id + "/concurrent/resync-all-test-3"
-        encoded_key_1 = storage_provider.encode_key(key_1)
+        encoded_key_1 = cloud_storage.storage_provider.encode_key(key_1)
 
         # Session 1 takes ownership of keys
         sess_1[key_1] = b"session_1"
@@ -85,9 +84,9 @@ class ConcurrentCloudMappingTests:
         # Session 1 only knows of these 3 keys:
         assert len(sess_1) == 3
         # Key 1 is changed by some manual means:
-        storage_provider.upload_data(encoded_key_1, sess_1.etags[key_1], b"other")
+        cloud_storage.storage_provider.upload_data(encoded_key_1, sess_1.etags[key_1], b"other")
         # Session 2 is created after the data changed:
-        sess_2 = CloudMapping(storage_provider=storage_provider)
+        sess_2 = cloud_storage.create_mapping(serialisation=None)
         # Session 2 knows of all the keys in the cloud:
         assert len(sess_2) >= 3
         # Session 2 can read the keys
@@ -100,13 +99,13 @@ class ConcurrentCloudMappingTests:
         sess_1[key_2]
         sess_1[key_3]
 
-    def test_resync_specific(self, storage_provider: StorageProvider, test_id: str):
-        sess_1 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
-        sess_2 = CloudMapping(storage_provider=storage_provider, sync_initially=False)
+    def test_resync_specific(self, cloud_storage: CloudStorage, test_id: str):
+        sess_1 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
+        sess_2 = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         key_1 = test_id + "/concurrent/resync-specific-test-1"
         key_2 = test_id + "/concurrent/resync-specific-test-2"
         key_3 = test_id + "/concurrent/resync-specific-test-3"
-        encoded_key_1 = storage_provider.encode_key(key_1)
+        encoded_key_1 = cloud_storage.storage_provider.encode_key(key_1)
 
         # Session 1 takes ownership of keys
         sess_1[key_1] = b"session_1"
@@ -116,7 +115,7 @@ class ConcurrentCloudMappingTests:
         assert len(sess_1) == 3
         assert len(sess_2) == 0
         # Key 1 is changed by some manual means:
-        storage_provider.upload_data(encoded_key_1, sess_1.etags[key_1], b"other")
+        cloud_storage.storage_provider.upload_data(encoded_key_1, sess_1.etags[key_1], b"other")
         # Session 2 syncs key 1 only:
         sess_2.sync_with_cloud(key_1)
         # Session 2 can now read key 1
@@ -124,9 +123,9 @@ class ConcurrentCloudMappingTests:
         # Session 2 only knows this one key
         assert len(sess_2) == 1
 
-    def test_resync_pass_ownership(self, storage_provider: StorageProvider, test_id: str):
-        sess_1 = CloudMapping(storage_provider=storage_provider)
-        sess_2 = CloudMapping(storage_provider=storage_provider)
+    def test_resync_pass_ownership(self, cloud_storage: CloudStorage, test_id: str):
+        sess_1 = cloud_storage.create_mapping(serialisation=None)
+        sess_2 = cloud_storage.create_mapping(serialisation=None)
         key = test_id + "/concurrent/resync-pass-ownership-test"
 
         # Session 1 takes ownership of key
