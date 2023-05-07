@@ -74,9 +74,9 @@ class WrapperTests:
     def test_aws_s3_mapping(self, test_container_name):
         storage = AWSS3Storage(
             bucket_name=test_container_name,
-            sync_initially=False,
         )
         cm = storage.create_mapping(
+            sync_initially=False,
             read_blindly=True,
             read_blindly_error=False,
             read_blindly_default=None,

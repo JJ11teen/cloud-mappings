@@ -108,18 +108,3 @@ def storage_provider(
 @pytest.fixture()
 def cloud_storage(storage_provider: StorageProvider) -> CloudStorage:
     return CloudStorage(storage_provider=storage_provider)
-
-
-# def pytest_generate_tests(metafunc):
-#     if "cloud_storage" in metafunc.fixturenames:
-#         metafunc.parametrize(
-#             "cloud_storage",
-#             [
-#                 "azure_blob_storage",
-#                 "azure_blob_storage_hierarchical",
-#                 "azure_table_storage",
-#                 "google_cloud_storage",
-#                 "aws_s3",
-#             ],
-#             indirect=True,
-#         )
