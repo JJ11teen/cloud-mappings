@@ -12,64 +12,62 @@ class CloudMapping(MutableMapping[str, T], ABC):
     """
 
     read_blindly: bool
-    """ Whether the cloud-mapping is currently set to read from the cloud blindly.
+    """ Whether the `CloudMapping` will read from the cloud without synchronising.
 
-        When read blindly is `False`, a cloud-mapping will raise a KeyError if a key that it
-        doesn't know about is accessed. If a key that it does know about is accessed but then
-        found to be out of sync with the cloud, a `cloudmappings.errors.KeySyncError` will be
-        raised.
+        When `read_blindly=False`, a `CloudMapping` will raise a `KeyError` unless a key has been
+        previously written using the same `CloudMapping` instance, or `.sync_with_cloud` has been
+        called and the key was in the cloud. If the value in the cloud has changed since being written
+        or synchronised, a `cloudmappings.errors.KeySyncError` will be raised.
 
-        When read blindly is `True`, a cloud-mapping will return the latest cloud version
-        for any key accessed, including keys it has no prior knowledge of (ie not in it's etag
-        dict). If there is no value for a key in the cloud, whether a `KeyValue` error is
-        raised is controlled by the `read_blindly_error` flag. If `False`, the current value of
-        `read_blindly_default` will be returned.
+        When `read_blindly=True`, a `CloudMapping` will directly query the cloud for any key
+        accessed, regardless of if it has previously written a value to that key. It will always get
+        the latest value from the cloud, and never raise a `cloudmappings.errors.KeySyncError` for
+        read operations. If there is no value for a key in the cloud, and `read_blindly_error=True`, a
+        `KeyError` will be raised. If there is no value for a key in the cloud and
+        `read_blindly_error=False`, `read_blindly_default` will be returned.
 
-        When read blindly is `True` a cloud-mapping will not raise `cloudmappings.errors.KeySyncError`
-        errors for read/get operations.
-
-        By default a cloud-mapping is instantiated with read blindly set to `False`.
+        By default a `CloudMapping` is instantiated with read blindly set to `False`.
     """
 
     read_blindly_error: bool
-    """Whether to raise a `KeyValue` error when read_blindly is `True` and the key does not have
+    """ Whether to raise a `KeyValue` error when `read_blindly=True` and a key does not have
         a value in the cloud. If `True`, this takes prescedence over `read_blindly_default`.
     """
 
     read_blindly_default: Any
-    """The value to return when read_blindly is `True`, the key does not have a value in the cloud,
-        and read_blindly_error is `False`.
+    """ The value to return when `read_blindly=True`, a key does not have a value in the cloud,
+        and `read_blindly_error=False`.
     """
 
     @abstractmethod
     def sync_with_cloud(self, key_prefix: str = None) -> None:
-        """Synchronise this cloud-mapping's etags with the cloud.
+        """Synchronise this `CloudMapping` with the cloud.
 
-        This allows a cloud-mapping to reflect the most recent updates to the cloud resource,
+        This allows a `CloudMapping` to reflect the most recent updates to the cloud resource,
         including those made by other instances or users. This can allow destructive operations
-        as a user may sync to get the latest updates, and then overwrite or delete items.
+        as a user may synchronise to get the latest updates, and then overwrite or delete values.
 
         Consider calling this if you are encountering a `cloudmappings.errors.KeySyncError`,
         and you are sure you would like to force the operation anyway.
 
-        This is called by default on instantiation of a cloud-mapping.
+        This is called by default on instantiation of a `CloudMapping`.
 
         Parameters
         ----------
         key_prefix : str, optional
-            Only sync keys beginning with the specified prefix, the key prefix configured on the
-            mapping is prepended as well.
+            Only sync keys beginning with the specified prefix, the key_prefix configured on the
+            mapping is prepended in combination with this parameter.
         """
         pass
 
     @property
     @abstractmethod
     def etags(self) -> Dict[str, str]:
-        """An internal dictionary of etags used to ensure the cloud-mapping is in sync with
-        the cloud storage resource. The dict is itself a mapping, mapping keys to their etags.
+        """An internal dictionary of etags used to ensure the `CloudMapping` is in sync with
+        the cloud storage resource. The dict maps keys to their last synchronised etags.
 
-        This dictionary is used as the cloud-mapping's expected view of the cloud. It is used
-        to determine if a key exists, and ensure that the value at each key is expected.
+        This dictionary is used as the `CloudMapping's expected view of the cloud. It is used
+        to determine if a key exists, and ensure that the value of each key is expected.
 
         See: https://en.wikipedia.org/wiki/HTTP_ETag
         """
@@ -78,11 +76,12 @@ class CloudMapping(MutableMapping[str, T], ABC):
     @property
     @abstractmethod
     def serialisation(self) -> CloudMappingSerialisation[T]:
-        """Gets the serialiser the mapping is configured to use for serialising and
-        deserialising values."""
+        """Gets the serialiser configured to use for serialising and deserialising values."""
         pass
 
     @property
     @abstractmethod
     def key_prefix(self) -> Optional[str]:
-        """Gets the key prefix the mapping is configured to apply to items in cloud storage"""
+        """Gets the key prefix configured to prepend to keys in the cloud. It is also used to
+        filter what is synchronised, resulting in the `CloudMapping` mapping to a subset of the
+        cloud resource."""

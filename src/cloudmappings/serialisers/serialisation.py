@@ -15,13 +15,13 @@ class CloudMappingSerialisation(Generic[T]):
         Must return a bytes-like object.
     loads : Callable
         Function to load values through when reading from the cloud.
-        Must expect a bytes-like object as its input.
+        Must accept a bytes-like object as its input.
     """
 
     dumps: Callable[[T], bytes]
     """Function to dump values through when writing to the cloud. Must return a bytes-like object."""
     loads: Callable[[bytes], T]
-    """Function to load values through when reading from the cloud. Must expect a bytes-like object as its input."""
+    """Function to load values through when reading from the cloud. Must accept a bytes-like object as its input."""
 
     def __bool__(self) -> bool:
         """A CloudMappingSerialisation is False only when both dumps and loads are None"""
@@ -48,7 +48,7 @@ class CloudMappingSerialisation(Generic[T]):
             The last function must return a bytes-like object.
         ordered_loads_funcs : List[Callable]
             An ordered list of functions to pass values through before saving bytes to the cloud.
-            The first function must expect a bytes-like object as its input.
+            The first function must accept a bytes-like object as its input.
 
         Returns
         -------

@@ -6,7 +6,7 @@ from cloudmappings.serialisers import CloudMappingSerialisation
 
 
 def csv() -> CloudMappingSerialisation[DataFrame]:
-    """Serialiser that uses pandas to serialise DataFrames to and from csvs
+    """Serialiser that uses pandas to serialise DataFrames as csvs
 
     Returns
     -------
