@@ -4,7 +4,7 @@ import zlib
 
 import pytest
 
-import cloudmappings.serialisers.default as DefaultSerialisers
+import cloudmappings.serialisers.core as DefaultSerialisers
 from cloudmappings.cloudstorage import CloudStorage
 
 
