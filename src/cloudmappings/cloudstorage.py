@@ -3,7 +3,7 @@ from typing import Any, Optional, TypeVar
 from cloudmappings._cloudmappinginternal import CloudMappingInternal
 from cloudmappings.cloudmapping import CloudMapping
 from cloudmappings.serialisers import CloudMappingSerialisation
-from cloudmappings.serialisers.default import pickle
+from cloudmappings.serialisers.core import pickle
 from cloudmappings.storageprovider import StorageProvider
 
 T = TypeVar("T")
@@ -30,24 +30,31 @@ class CloudStorage:
 
         Parameters
         ----------
-        storage_provider : StorageProvider
-            The storage provider to use as the backing for the cloud-mapping.
         sync_initially : bool, default=True
             Whether to call `sync_with_cloud` initially
         read_blindly : bool, default=False
-            Whether to read blindly or not by default. See `read_blindly` attribute for more
-            information.
+            Whether the `CloudMapping` will read from the cloud without synchronising.
+            When `read_blindly=False`, a `CloudMapping` will raise a `KeyError` unless a key has been
+            previously written using the same `CloudMapping` instance, or `.sync_with_cloud` has been
+            called and the key was in the cloud. If the value in the cloud has changed since being
+            written or synchronised, a `cloudmappings.errors.KeySyncError` will be raised.
+            When `read_blindly=True`, a `CloudMapping` will directly query the cloud for any key
+            accessed, regardless of if it has previously written a value to that key. It will always get
+            the latest value from the cloud, and never raise a `cloudmappings.errors.KeySyncError` for
+            read operations. If there is no value for a key in the cloud, and `read_blindly_error=True`,
+            a `KeyError` will be raised. If there is no value for a key in the cloud and
+            `read_blindly_error=False`, `read_blindly_default` will be returned.
         read_blindly_error : bool, default=False
-            Whether to raise `KeyError`s when read_blindly is enabled and the key does not have a value
-            in the cloud.
+            Whether to raise a `KeyValue` error when `read_blindly=True` and a key does not have
+            a value in the cloud. If `True`, this takes prescedence over `read_blindly_default`.
         read_blindly_default : Any, default=None
-            The value to return when read_blindly is enabled, the key does not have a value in the
-            cloud, and read_blindly_error is `False`.
-        serialiser : CloudMappingSerialiser
+            The value to return when `read_blindly=True`, a key does not have a value in the cloud,
+            and `read_blindly_error=False`.
+        serialiser : CloudMappingSerialiser, default=pickle()
             CloudMappingSerialiser to use, defaults to `pickle`.
         key_prefix : Optional[str], default=None
-            Prefix to apply to keys in cloud storage. Enables mappings to be a subdirectory within a
-            cloud storage service.
+            Prefix to apply to keys in cloud storage. Enables `CloudMapping`s to map to a subdirectory
+            within a cloud storage service, as opposed to the whole resource.
         """
         mapping = CloudMappingInternal()
         mapping._storage_provider = self.storage_provider

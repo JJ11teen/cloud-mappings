@@ -5,13 +5,14 @@ from cloudmappings.serialisers import CloudMappingSerialisation
 
 
 def none() -> CloudMappingSerialisation[bytes]:
-    """This serialiser performs no serialisation, and accesses raw bytes
+    """This serialiser performs no serialisation, and passes raw bytes
 
     It is implemented as `None`, and `None` can be used directly, however
     using this serialiser enables type hints to correctly pick up `bytes`
     as the mapping value.
 
     Returns
+    -------
     CloudMappingSerialisation
         None, typed as CloudMappingSerialisation[bytes]
     """
@@ -23,7 +24,7 @@ def pickle(protocol: int = None) -> CloudMappingSerialisation[Any]:
 
     Parameters
     ----------
-    protocol : str, default=None
+    protocol : int, default=None
         The pickle protocol to use, defaults to None which internally defaultto `pickle.DEFAULT_PROTOCOL`
 
     Returns
@@ -41,6 +42,11 @@ def pickle(protocol: int = None) -> CloudMappingSerialisation[Any]:
 
 def raw_string(encoding: str = "utf-8") -> CloudMappingSerialisation[str]:
     """Serialiser that only encodes raw string values
+
+    Parameters
+    ----------
+    encoding : str, default="utf-8"
+        The string encoding to use, passed to bytes() and str() for dumps and loads respectively.
 
     Returns
     -------
