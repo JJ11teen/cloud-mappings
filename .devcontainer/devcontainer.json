@@ -4,36 +4,38 @@
 	"name": "cloud-mappings Development",
 	"build": {
 		"dockerfile": "Dockerfile",
-		"context": "..",
+		"context": ".."
 	},
-	// Set *default* container specific settings.json values on container create.
-	"settings": {
-		"python.pythonPath": "/usr/local/bin/python",
-		"python.languageServer": "Pylance",
-		"python.linting.enabled": false,
-		"editor.formatOnSave": true,
-		"python.formatting.provider": "black",
-		"python.formatting.black": "/usr/local/bin/black",
-		"python.sortImports.args": [
-			"--profile",
-			"black",
-			"--section-default",
-			"THIRDPARTY",
-			"--project",
-			"src"
-		],
-		"[python]": {
-			"editor.codeActionsOnSave": {
-				"source.organizeImports": true
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				"ms-python.isort",
+				"eamodio.gitlens"
+			],
+			"settings": {
+				"python.pythonPath": "/usr/local/bin/python",
+				"python.languageServer": "Pylance",
+				"editor.formatOnSave": true,
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": true
+					}
+				},
+				"isort.args": [
+					"--profile",
+					"black",
+					"--section-default",
+					"THIRDPARTY",
+					"--project",
+					"src"
+				]
 			}
 		}
 	},
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"eamodio.gitlens"
-	],
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"onCreateCommand": "pip install -e .[azureblob,azuretable,gcpstorage,awss3,tests]",
 	"remoteUser": "vscode"
 }

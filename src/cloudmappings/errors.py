@@ -1,4 +1,4 @@
-class KeySyncError(ValueError):
+class KeySyncError(KeyError):
     storage_provider_name: str
     key: str
     expected_etag: str

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 from urllib.parse import quote, unquote
 
 from azure.core import MatchConditions
@@ -8,9 +8,9 @@ from azure.core.exceptions import (
     ResourceNotFoundError,
 )
 from azure.data.tables import TableClient, UpdateMode
-from azure.identity import DefaultAzureCredential
 
-from .storageprovider import StorageProvider
+from cloudmappings.errors import KeySyncError, ValueSizeError
+from cloudmappings.storageprovider import StorageProvider
 
 
 def _chunk_bytes(data: bytes) -> Dict[str, bytes]:
@@ -27,8 +27,8 @@ class AzureTableStorageProvider(StorageProvider):
     def __init__(
         self,
         table_name: str,
+        credential: Any,
         endpoint: str = None,
-        credential=DefaultAzureCredential(),
         connection_string: str = None,
     ) -> None:
         if connection_string is not None:
@@ -69,15 +69,15 @@ class AzureTableStorageProvider(StorageProvider):
         except ResourceNotFoundError as e:
             if etag is None:
                 return None
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
         else:
             if etag is not None and etag != entity.metadata["etag"]:
-                self.raise_key_sync_error(key=key, etag=etag)
+                raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
             return _dechunk_entity(entity)
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         if not isinstance(data, bytes):
-            raise ValueError("Data must be bytes like")
+            raise ValueError(f"Data must be bytes like, got {type(data)}")
         entity = {
             "PartitionKey": key,
             "RowKey": "cm",
@@ -94,12 +94,12 @@ class AzureTableStorageProvider(StorageProvider):
                     match_condition=MatchConditions.IfNotModified,
                 )
         except ResourceExistsError as e:
-            self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
         except HttpResponseError as e:
             if "update condition specified in the request was not satisfied" in e.exc_msg or (
                 "etag value" in e.exc_msg and "is not valid" in e.exc_msg
             ):
-                self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+                raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
             elif (
                 e.model is not None
                 and e.model.additional_properties is not None
@@ -107,7 +107,7 @@ class AzureTableStorageProvider(StorageProvider):
                 and "code" in e.model.additional_properties["odata.error"]
                 and e.model.additional_properties["odata.error"]["code"] == "EntityTooLarge"
             ):
-                self.raise_value_size_error(key=key, inner_exception=e)
+                raise ValueSizeError(storage_provider_name=self.logical_name(), key=key) from e
             else:
                 raise e
         return response["etag"]
@@ -124,12 +124,12 @@ class AzureTableStorageProvider(StorageProvider):
             if "update condition specified in the request was not satisfied" in e.exc_msg or (
                 "etag value" in e.exc_msg and "is not valid" in e.exc_msg
             ):
-                self.raise_key_sync_error(key=key, etag=etag, inner_exception=e)
+                raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from e
             else:
                 raise e
 
     def list_keys_and_etags(self, key_prefix: str) -> Dict[str, str]:
-        if key_prefix is None:
+        if not key_prefix:
             query = self._table_client.list_entities()
         else:
             key_prefix_stop = key_prefix[:-1] + chr(ord(key_prefix[-1]) + 1)

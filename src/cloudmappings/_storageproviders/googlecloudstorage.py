@@ -4,7 +4,8 @@ from google.cloud import storage
 from google.cloud.exceptions import Conflict
 from google.cloud.storage.blob import Blob
 
-from .storageprovider import StorageProvider
+from cloudmappings.errors import KeySyncError
+from cloudmappings.storageprovider import StorageProvider
 
 
 class GoogleCloudStorageProvider(StorageProvider):
@@ -50,7 +51,7 @@ class GoogleCloudStorageProvider(StorageProvider):
         )
         existing_etag = self._parse_etag(b)
         if etag is not None and etag != existing_etag:
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         if b is None:
             return None
         return b.download_as_bytes(
@@ -59,13 +60,13 @@ class GoogleCloudStorageProvider(StorageProvider):
 
     def upload_data(self, key: str, etag: str, data: bytes) -> str:
         if not isinstance(data, bytes):
-            raise ValueError("Data must be bytes like")
+            raise ValueError(f"Data must be bytes like, got {type(data)}")
         b = self._bucket.get_blob(
             blob_name=key,
         )
         existing_etag = self._parse_etag(b)
         if etag != existing_etag:
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         if b is None:
             b = self._bucket.blob(
                 blob_name=key,
@@ -82,7 +83,7 @@ class GoogleCloudStorageProvider(StorageProvider):
         )
         existing_etag = self._parse_etag(b)
         if etag != existing_etag:
-            self.raise_key_sync_error(key=key, etag=etag)
+            raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag)
         self._bucket.delete_blob(
             blob_name=key,
             if_generation_match=b.generation,

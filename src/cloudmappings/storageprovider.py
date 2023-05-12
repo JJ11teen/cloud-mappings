@@ -2,22 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from urllib.parse import quote, unquote
 
-from ..errors import KeySyncError, ValueSizeError
-
 
 class StorageProvider(ABC):
-    def raise_key_sync_error(self, key: str, etag: str, inner_exception: Exception = None):
-        raise KeySyncError(storage_provider_name=self.logical_name(), key=key, etag=etag) from inner_exception
-
-    def raise_value_size_error(self, key: str, inner_exception: Exception = None):
-        raise ValueSizeError(storage_provider_name=self.logical_name(), key=key) from inner_exception
-
-    def encode_key(self, unsafe_key) -> str:
-        return quote(unsafe_key, errors="strict")
-
-    def decode_key(self, encoded_key) -> str:
-        return unquote(encoded_key, errors="strict")
-
     @abstractmethod
     def logical_name(self) -> str:
         """Returns a human readable string identifying the current implementation, and which
@@ -46,6 +32,38 @@ class StorageProvider(ABC):
             `True` if the parent cloud resouce already existed, otherwise `False`.
         """
         pass
+
+    def encode_key(self, unsafe_key) -> str:
+        """Encode a possibly unsafe input string input a safe value to use as a key in the
+        storage service. Defaults to `urllib.parse.quote`
+
+        Parameters
+        ----------
+        unsafe_key: str
+            The unsafe key to encode
+
+        Returns
+        -------
+        str
+            Safely encoded key
+        """
+        return quote(unsafe_key, errors="strict")
+
+    def decode_key(self, encoded_key) -> str:
+        """Decodes a previously encoded key back to it's original value.
+        Defaults to `urllib.parse.unquote`
+
+        Parameters
+        ----------
+        encoded_key: str
+            The encoded key to decode
+
+        Returns
+        -------
+        str
+            Decoded key
+        """
+        return unquote(encoded_key, errors="strict")
 
     @abstractmethod
     def download_data(self, key: str, etag: str) -> bytes:
@@ -99,6 +117,8 @@ class StorageProvider(ABC):
             When the etag specified does not match the value in the cloud
         ValueError
             When data is not bytes-like
+        ValueSizeError
+            When data is too large for storage provider
 
         Returns
         -------
