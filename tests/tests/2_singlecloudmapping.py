@@ -151,3 +151,39 @@ class SingleCloudMappingTests:
         assert prefix not in cm
         assert key in cm
         assert len(cm) == 1
+
+    def test_mapping_prefix_sync(self, cloud_storage: CloudStorage, test_id: str):
+        prefix_1 = test_id + "/mapping-prefix-test-1/"
+        prefix_2 = test_id + "/mapping-prefix-test-2/"
+
+        # TODO: simplify all tests by using key_prefixes instead of not syncing initially:
+        cm_1 = cloud_storage.create_mapping(key_prefix=prefix_1)
+        cm_2 = cloud_storage.create_mapping(key_prefix=prefix_2)
+
+        assert len(cm_1) == 0
+        assert len(cm_2) == 0
+
+        cm_1["k1"] = 1
+
+        assert len(cm_1) == 1
+        assert len(cm_2) == 0
+
+        cm_1.sync_with_cloud()
+        cm_2.sync_with_cloud()
+
+        assert len(cm_1) == 1
+        assert len(cm_2) == 0
+
+        cm_2["k1"] = 2
+
+        assert len(cm_1) == 1
+        assert len(cm_2) == 1
+
+        cm_1.sync_with_cloud()
+        cm_2.sync_with_cloud()
+
+        assert len(cm_1) == 1
+        assert len(cm_2) == 1
+
+        assert cm_1["k1"] == 1
+        assert cm_2["k1"] == 2
