@@ -22,14 +22,14 @@ class CloudMappingUtilsTests:
         with pytest.raises(KeyError):
             del cm[key]
 
-    def test_unknown_kwy_out_of_sync_errors(self, cloud_storage: CloudStorage, test_prefix: str):
+    def test_known_key_out_of_sync_errors(self, cloud_storage: CloudStorage, test_prefix: str):
         key = "known-out-of-sync"
         cm = cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")
 
         # The cloudmapping sets some initial state
         cm[key] = "initial"
         # Upload some data to get out of sync
-        cloud_storage.storage_provider.upload_data(f"{test_prefix}/{key}", None, b"new-data!")
+        cloud_storage.storage_provider.upload_data(f"{test_prefix}/{key}", cm.etags[key], b"new-data!")
 
         assert key in cm
         # Cloudmapping now gets a KeySyncError on read, delete, and set:
@@ -136,7 +136,7 @@ class CloudMappingUtilsTests:
         # Upload some data to read blindly
         cloud_storage.storage_provider.upload_data(key, None, b"blind")
 
-        cm = cloud_storage.create_mapping(sync_initially=False)
+        cm = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         cm.read_blindly = True
         assert cm[key] == b"blind"
 
