@@ -96,7 +96,7 @@ class CloudMappingUtilityTests:
             ordered_loads_funcs=[dummy.loads_first, dummy.loads_second],
         )
 
-        assert serialiser.dumps("test") == "dumpsecond"
+        assert serialiser.dumps("test") == "dumpssecond"
         dumps_1_spy.assert_called_once_with("test")
         dumps_2_spy.assert_called_once_with("dumpsfirst")
 
