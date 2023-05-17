@@ -70,9 +70,9 @@ class StorageProviderTests:
         level_2 = level_1 + "subdirectory/"
         key = "key"
 
-        root_etag = storage_provider.upload_data(root + key, None, b"data")
-        level_1_etag = storage_provider.upload_data(level_1 + key, None, b"data")
-        level_2_etag = storage_provider.upload_data(level_2 + key, None, b"data")
+        root_etag = storage_provider.upload_data(storage_provider.encode_key(root + key), None, b"data")
+        level_1_etag = storage_provider.upload_data(storage_provider.encode_key(level_1 + key), None, b"data")
+        level_2_etag = storage_provider.upload_data(storage_provider.encode_key(level_2 + key), None, b"data")
 
         # Check root lists all keys
         keys_and_etags = storage_provider.list_keys_and_etags(root)

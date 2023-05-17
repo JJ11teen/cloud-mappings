@@ -27,14 +27,14 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def run_id() -> str:
-    test_run_id = uuid4().hex[10:18]
+    test_run_id = uuid4().hex[:16]
     logging.warning(f"Using keys with the prefix: {test_run_id}")
     return test_run_id
 
 
 @pytest.fixture(scope="function")
 def test_id() -> str:
-    return uuid4().hex[10:18]
+    return uuid4().hex[:16]
 
 
 @pytest.fixture(scope="function")

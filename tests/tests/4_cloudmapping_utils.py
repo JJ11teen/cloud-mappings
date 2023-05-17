@@ -52,10 +52,10 @@ class CloudMappingUtilsTests:
 
         # Upload some data to find with a sync
         cloud_storage.storage_provider.upload_data(
-            cloud_storage.storage_provider.encode_key(f"{prefix}/two/one"), None, b"1"
+            cloud_storage.storage_provider.encode_key(f"{prefix}/one"), None, b"1"
         )
         cloud_storage.storage_provider.upload_data(
-            cloud_storage.storage_provider.encode_key(f"{prefix}/two"), None, b"2"
+            cloud_storage.storage_provider.encode_key(f"{prefix}/two/one"), None, b"2"
         )
 
         cm.sync_with_cloud(f"{prefix}/two/")
@@ -65,7 +65,7 @@ class CloudMappingUtilsTests:
         cm.sync_with_cloud(prefix)
         assert len(cm) == 2
         assert f"{prefix}/two/one" in cm
-        assert f"{prefix}/two" in cm
+        assert f"{prefix}/one" in cm
 
     def test_key_prefix_hierarchy(self, cloud_storage: CloudStorage, test_prefix: str):
         cm_root = cloud_storage.create_mapping(sync_initially=False, key_prefix=f"{test_prefix}/")
