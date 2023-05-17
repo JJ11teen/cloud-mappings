@@ -212,6 +212,6 @@ class AWSS3Storage(CloudStorage):
         --------
         cloud-mapping : `CloudMapping`
         """
-        from cloudmappings._storageproviders.awss3 import AWSS3Provider
+        from cloudmappings._storageproviders.awss3storage import AWSS3StorageProvider
 
-        super().__init__(AWSS3Provider(bucket_name=bucket_name, silence_warning=silence_warning))
+        super().__init__(AWSS3StorageProvider(bucket_name=bucket_name, silence_warning=silence_warning))

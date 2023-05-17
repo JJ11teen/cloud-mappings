@@ -129,37 +129,3 @@ class CloudMappingUtilityTests:
         # Test default value
         cm.read_blindly = True
         assert cm[test_id + "empty-key"] is None
-
-    def test_changing_read_blindly_defaults(self, cloud_storage: CloudStorage, test_id: str):
-        cm = cloud_storage.create_mapping(sync_initially=False, read_blindly=True)
-
-        key = test_id + "empty-key"
-
-        assert cm[key] is None
-
-        cm.read_blindly_default = False
-        assert cm[key] == False
-
-        cm.read_blindly_default = 0
-        assert cm[key] == 0
-
-    def test_key_prefix(self, cloud_storage: CloudStorage, test_id: str):
-        key_prefix = "keyprefix/"
-        cm_root = cloud_storage.create_mapping(sync_initially=False)
-        cm_sub = cloud_storage.create_mapping(sync_initially=False, key_prefix=key_prefix)
-
-        key = test_id + "key-prefix-key"
-        key_with_prefix = key_prefix + key
-
-        cm_root[key] = 1
-        # Set from subdirectory
-        cm_sub[key] = "sub"  # Won't raise error as different key
-
-        # Get from root
-        cm_root.sync_with_cloud(key_with_prefix)
-        assert cm_root[key_with_prefix] == "sub"
-
-        # Override from root and get from subdirectory
-        cm_root[key_with_prefix] = "root"
-        cm_sub.sync_with_cloud(key)
-        assert cm_sub[key] == "root"

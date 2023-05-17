@@ -64,6 +64,37 @@ class StorageProviderTests:
         for encoded_key, etag in keys_and_etags.items():
             assert etag is not None, (encoded_key, etag)
 
+    def test_keys_and_etags_are_listed_with_prefix(self, storage_provider: StorageProvider, test_id: str):
+        root = test_id + "-keys-and-etags-list-prefix/"
+        level_1 = root + "directory/"
+        level_2 = level_1 + "subdirectory/"
+        key = "key"
+
+        root_etag = storage_provider.upload_data(root + key, None, b"data")
+        level_1_etag = storage_provider.upload_data(level_1 + key, None, b"data")
+        level_2_etag = storage_provider.upload_data(level_2 + key, None, b"data")
+
+        # Check root lists all keys
+        keys_and_etags = storage_provider.list_keys_and_etags(root)
+        assert len(keys_and_etags) == 3
+        assert keys_and_etags[root + key] == root_etag
+        assert keys_and_etags[level_1 + key] == level_1_etag
+        assert keys_and_etags[level_2 + key] == level_2_etag
+
+        # Check level 1 lists level 1 and level 2, but not root
+        keys_and_etags = storage_provider.list_keys_and_etags(level_1)
+        assert len(keys_and_etags) == 2
+        assert root + key not in keys_and_etags
+        assert keys_and_etags[level_1 + key] == level_1_etag
+        assert keys_and_etags[level_2 + key] == level_2_etag
+
+        # Check level 2 only contains level 2 prefixed keys
+        keys_and_etags = storage_provider.list_keys_and_etags(level_2)
+        assert len(keys_and_etags) == 1
+        assert root + key not in keys_and_etags
+        assert level_1 + key not in keys_and_etags
+        assert keys_and_etags[level_2 + key] == level_2_etag
+
     def test_keys_are_deleted(self, storage_provider: StorageProvider, test_id: str):
         key = test_id + "-keys-deleted-test"
         encoded_key = storage_provider.encode_key(key)
