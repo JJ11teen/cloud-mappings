@@ -73,7 +73,10 @@ class CloudMappingInternal(CloudMapping[T]):
         del self._etags[key]
 
     def __contains__(self, key: str) -> bool:
-        return key in self._etags
+        if not self.read_blindly:
+            return key in self._etags
+        key_prefix = self._encode_key(key_prefix)
+        return key in self._storage_provider.list_keys_and_etags(key_prefix)
 
     def keys(self) -> Iterator[str]:
         return iter(self._etags.keys())

@@ -26,6 +26,8 @@ class CloudMapping(MutableMapping[str, T], ABC):
         `KeyError` will be raised. If there is no value for a key in the cloud and
         `read_blindly_error=False`, `read_blindly_default` will be returned.
 
+        Read blindly only impacts __get__ (`d[key]`) and __contains__ (`in`) operations.
+
         By default a `CloudMapping` is instantiated with read blindly set to `False`.
     """
 
