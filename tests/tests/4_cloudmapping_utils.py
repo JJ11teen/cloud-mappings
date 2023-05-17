@@ -3,11 +3,10 @@ import pytest
 from cloudmappings.cloudmapping import CloudMapping
 from cloudmappings.cloudstorage import CloudStorage
 from cloudmappings.errors import KeySyncError
-from cloudmappings.serialisers.core import pickle
 
 
 class CloudMappingUtilsTests:
-    def test_unknown_key_out_of_sync_errors(cloud_storage: CloudStorage, test_prefix: str):
+    def test_unknown_key_out_of_sync_errors(self, cloud_storage: CloudStorage, test_prefix: str):
         key = "unknown-out-of-sync"
         cm = cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")
 
@@ -23,7 +22,7 @@ class CloudMappingUtilsTests:
         with pytest.raises(KeyError):
             del cm[key]
 
-    def test_unknown_kwy_out_of_sync_errors(cloud_storage: CloudStorage, test_prefix: str):
+    def test_unknown_kwy_out_of_sync_errors(self, cloud_storage: CloudStorage, test_prefix: str):
         key = "known-out-of-sync"
         cm = cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")
 
@@ -41,7 +40,7 @@ class CloudMappingUtilsTests:
         with pytest.raises(KeySyncError):
             del cm[key]
 
-    def test_sync_with_cloud(cloud_storage: CloudStorage, test_prefix: str):
+    def test_sync_with_cloud(self, cloud_storage: CloudStorage, test_prefix: str):
         prefix = f"{test_prefix}/sync-with-cloud"
         cm = cloud_storage.create_mapping(sync_initially=False)
 
@@ -113,8 +112,8 @@ class CloudMappingUtilsTests:
         assert cm_1[same_key] == 1
         assert cm_2[same_key] == 2
 
-    def test_repr(self, shared_cloud_mapping: CloudMapping):
-        _repr = str(shared_cloud_mapping)
+    def test_repr(self, cloud_mapping: CloudMapping):
+        _repr = str(cloud_mapping)
 
         assert _repr.startswith("cloudmapping<CloudStorageProvider=")
 
@@ -132,7 +131,7 @@ class CloudMappingUtilsTests:
         else:
             pytest.fail("Unknown provider repr")
 
-    def test_read_blindy_get(cloud_storage: CloudStorage, test_prefix: str):
+    def test_read_blindy_get(self, cloud_storage: CloudStorage, test_prefix: str):
         key = f"{test_prefix}/read-blindly-get"
         # Upload some data to read blindly
         cloud_storage.storage_provider.upload_data(key, None, b"blind")
@@ -141,7 +140,7 @@ class CloudMappingUtilsTests:
         cm.read_blindly = True
         assert cm[key] == b"blind"
 
-    def test_read_blindy_contains(cloud_storage: CloudStorage, test_prefix: str):
+    def test_read_blindy_contains(self, cloud_storage: CloudStorage, test_prefix: str):
         key = f"{test_prefix}/read-blindly-contains"
         # Upload some data to read blindly
         cloud_storage.storage_provider.upload_data(key, None, b"blind")

@@ -31,20 +31,20 @@ class CloudStorageTests:
             table_name=test_container_name,
             credential=DefaultAzureCredential(),
         )
-        assert isinstance(storage, AzureTableStorageProvider)
+        assert isinstance(storage.storage_provider, AzureTableStorageProvider)
 
     def test_google_cloud_storage(self, gcp_storage_project, test_container_name):
         storage = GoogleCloudStorage(
             project=gcp_storage_project,
             bucket_name=test_container_name,
         )
-        assert isinstance(storage, GoogleCloudStorageProvider)
+        assert isinstance(storage.storage_provider, GoogleCloudStorageProvider)
 
     def test_aws_s3_storage(self, test_container_name):
         storage = AWSS3Storage(
             bucket_name=test_container_name,
         )
-        assert isinstance(storage, AWSS3StorageProvider)
+        assert isinstance(storage.storage_provider, AWSS3StorageProvider)
 
     def test_creation_defaults(self, cloud_storage: CloudStorage):
         cm = cloud_storage.create_mapping()

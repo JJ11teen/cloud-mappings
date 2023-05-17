@@ -27,14 +27,14 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def run_id() -> str:
-    test_run_id = str(uuid4())
+    test_run_id = uuid4().hex[10:18]
     logging.warning(f"Using keys with the prefix: {test_run_id}")
     return test_run_id
 
 
 @pytest.fixture(scope="function")
 def test_id() -> str:
-    return str(uuid4())
+    return uuid4().hex[10:18]
 
 
 @pytest.fixture(scope="function")
@@ -116,7 +116,7 @@ def storage_provider(
     raise ValueError(f"Test requested unknown storage provider '{request.param}'")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def cloud_storage(storage_provider: StorageProvider) -> CloudStorage:
     return CloudStorage(storage_provider=storage_provider)
 

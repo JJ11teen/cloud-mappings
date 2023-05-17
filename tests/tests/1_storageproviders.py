@@ -65,7 +65,7 @@ class StorageProviderTests:
             assert etag is not None, (encoded_key, etag)
 
     def test_keys_and_etags_are_listed_with_prefix(self, storage_provider: StorageProvider, test_id: str):
-        root = test_id + "-keys-and-etags-list-prefix/"
+        root = test_id + "-etags-list-prefix/"
         level_1 = root + "directory/"
         level_2 = level_1 + "subdirectory/"
         key = "key"
