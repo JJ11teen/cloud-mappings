@@ -83,6 +83,9 @@ class AzureBlobStorage(CloudStorage):
     ) -> None:
         """A cloud-mapping backed by an Azure Blob Storage Container
 
+        Note that if you're using hierarchical namespace, directories and blobs cannot share the
+        same key.
+
         Parameters
         ----------
         container_name : str
