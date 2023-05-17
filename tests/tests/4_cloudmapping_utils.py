@@ -11,7 +11,9 @@ class CloudMappingUtilsTests:
         cm = cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")
 
         # Upload some data the mapping doesnt know about to get out of sync
-        cloud_storage.storage_provider.upload_data(f"{test_prefix}/{key}", None, b"new-data!")
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(f"{test_prefix}/{key}"), None, b"new-data!"
+        )
         assert key not in cm
 
         # Cloudmapping doesn't know the key exists, so KeyError on get and delete, and KeySyncError on set:
@@ -29,7 +31,9 @@ class CloudMappingUtilsTests:
         # The cloudmapping sets some initial state
         cm[key] = "initial"
         # Upload some data to get out of sync
-        cloud_storage.storage_provider.upload_data(f"{test_prefix}/{key}", cm.etags[key], b"new-data!")
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(f"{test_prefix}/{key}"), cm.etags[key], b"new-data!"
+        )
 
         assert key in cm
         # Cloudmapping now gets a KeySyncError on read, delete, and set:
@@ -47,8 +51,12 @@ class CloudMappingUtilsTests:
         assert len(cm) == 0
 
         # Upload some data to find with a sync
-        cloud_storage.storage_provider.upload_data(f"{prefix}/two/one", None, b"1")
-        cloud_storage.storage_provider.upload_data(f"{prefix}/two", None, b"2")
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(f"{prefix}/two/one"), None, b"1"
+        )
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(f"{prefix}/two"), None, b"2"
+        )
 
         cm.sync_with_cloud(f"{prefix}/two/")
         assert len(cm) == 1
@@ -134,7 +142,7 @@ class CloudMappingUtilsTests:
     def test_read_blindy_get(self, cloud_storage: CloudStorage, test_prefix: str):
         key = f"{test_prefix}/read-blindly-get"
         # Upload some data to read blindly
-        cloud_storage.storage_provider.upload_data(key, None, b"blind")
+        cloud_storage.storage_provider.upload_data(cloud_storage.storage_provider.encode_key(key), None, b"blind")
 
         cm = cloud_storage.create_mapping(sync_initially=False, serialisation=None)
         cm.read_blindly = True
@@ -143,7 +151,7 @@ class CloudMappingUtilsTests:
     def test_read_blindy_contains(self, cloud_storage: CloudStorage, test_prefix: str):
         key = f"{test_prefix}/read-blindly-contains"
         # Upload some data to read blindly
-        cloud_storage.storage_provider.upload_data(key, None, b"blind")
+        cloud_storage.storage_provider.upload_data(cloud_storage.storage_provider.encode_key(key), None, b"blind")
 
         cm = cloud_storage.create_mapping(sync_initially=False)
         cm.read_blindly = True
