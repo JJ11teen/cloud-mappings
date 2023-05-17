@@ -76,7 +76,7 @@ class AzureBlobStorage(CloudStorage):
     def __init__(
         self,
         container_name: str,
-        credential: Any,
+        credential: Any = None,
         account_url: str = None,
         connection_string: str = None,
         create_container_metadata=None,
@@ -118,7 +118,7 @@ class AzureTableStorage(CloudStorage):
     def __init__(
         self,
         table_name: str,
-        credential: Any,
+        credential: Any = None,
         endpoint: str = None,
         connection_string: str = None,
     ) -> None:
