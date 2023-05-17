@@ -76,12 +76,15 @@ class AzureBlobStorage(CloudStorage):
     def __init__(
         self,
         container_name: str,
-        credential: Any,
+        credential: Any = None,
         account_url: str = None,
         connection_string: str = None,
         create_container_metadata=None,
     ) -> None:
         """A cloud-mapping backed by an Azure Blob Storage Container
+
+        Note that if you're using hierarchical namespace, directories and blobs cannot share the
+        same key.
 
         Parameters
         ----------
@@ -118,7 +121,7 @@ class AzureTableStorage(CloudStorage):
     def __init__(
         self,
         table_name: str,
-        credential: Any,
+        credential: Any = None,
         endpoint: str = None,
         connection_string: str = None,
     ) -> None:
@@ -212,6 +215,6 @@ class AWSS3Storage(CloudStorage):
         --------
         cloud-mapping : `CloudMapping`
         """
-        from cloudmappings._storageproviders.awss3 import AWSS3Provider
+        from cloudmappings._storageproviders.awss3storage import AWSS3StorageProvider
 
-        super().__init__(AWSS3Provider(bucket_name=bucket_name, silence_warning=silence_warning))
+        super().__init__(AWSS3StorageProvider(bucket_name=bucket_name, silence_warning=silence_warning))

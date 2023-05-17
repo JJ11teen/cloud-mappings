@@ -5,19 +5,20 @@ from uuid import uuid4
 import pytest
 from azure.identity import DefaultAzureCredential
 
-from cloudmappings._storageproviders.awss3 import AWSS3Provider
+from cloudmappings._storageproviders.awss3storage import AWSS3StorageProvider
 from cloudmappings._storageproviders.azureblobstorage import AzureBlobStorageProvider
 from cloudmappings._storageproviders.azuretablestorage import AzureTableStorageProvider
 from cloudmappings._storageproviders.googlecloudstorage import (
     GoogleCloudStorageProvider,
 )
+from cloudmappings.cloudmapping import CloudMapping
 from cloudmappings.cloudstorage import CloudStorage
 from cloudmappings.storageprovider import StorageProvider
 
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--test_container_id",
+        "--test-container-id",
         action="store",
         required=True,
         help="Suffix to add to container resources used for this test run. Use commit hash in cicd",
@@ -25,10 +26,20 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="session")
-def test_id() -> str:
-    test_run_id = str(uuid4())
+def run_id() -> str:
+    test_run_id = uuid4().hex[:16]
     logging.warning(f"Using keys with the prefix: {test_run_id}")
     return test_run_id
+
+
+@pytest.fixture(scope="function")
+def test_id() -> str:
+    return uuid4().hex[:16]
+
+
+@pytest.fixture(scope="function")
+def test_prefix(run_id: str, test_id: str) -> str:
+    return f"{run_id}/{test_id}"
 
 
 @pytest.fixture(scope="session")
@@ -99,12 +110,22 @@ def storage_provider(
             bucket_name=test_container_name,
         )
     elif request.param == "aws_s3":
-        return AWSS3Provider(
+        return AWSS3StorageProvider(
             bucket_name=test_container_name,
         )
     raise ValueError(f"Test requested unknown storage provider '{request.param}'")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def cloud_storage(storage_provider: StorageProvider) -> CloudStorage:
     return CloudStorage(storage_provider=storage_provider)
+
+
+@pytest.fixture(scope="function")
+def cloud_mapping(cloud_storage: CloudStorage, test_prefix: str) -> CloudMapping:
+    return cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")
+
+
+@pytest.fixture(scope="function")
+def cloud_mapping_two(cloud_storage: CloudStorage, test_prefix: str) -> CloudMapping:
+    return cloud_storage.create_mapping(key_prefix=f"{test_prefix}/")

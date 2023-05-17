@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 _metadata_etag_key = "cloud-mappings-etag"
 
 
-class AWSS3Provider(StorageProvider):
+class AWSS3StorageProvider(StorageProvider):
     def __init__(
         self,
         bucket_name: str,

@@ -49,4 +49,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           echo $GCP_CREDENTIALS_BASE64 | base64 -d > gcp.json
-          pytest --test_container_id "${GITHUB_SHA::8}${{ matrix.python-version-str }}"
+          pytest --test-container-id "${GITHUB_SHA::8}${{ matrix.python-version-str }}"

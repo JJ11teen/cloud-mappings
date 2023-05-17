@@ -17,7 +17,7 @@ class AzureBlobStorageProvider(StorageProvider):
     def __init__(
         self,
         container_name: str,
-        credential: Any,
+        credential: Any = None,
         account_url: str = None,
         connection_string: str = None,
         create_container_metadata=None,

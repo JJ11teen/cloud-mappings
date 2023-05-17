@@ -245,6 +245,6 @@ Set environment variables for each provider:
 
 Run tests with:
 ```bash
-pytest --test_container_id <container-suffix-to-use-for-tests>
+pytest --test-container-id <container-suffix-to-use-for-tests>
 ```
 The testing container will be prefixed by "pytest", and the commit sha is used within build & release workflows. Note that if the container specified already exists one test will fail.
