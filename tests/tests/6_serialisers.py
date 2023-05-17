@@ -25,13 +25,15 @@ class CloudMappingUtilityTests:
         assert not cm.serialisation
 
         # Manual upload and serialisation:
-        cloud_storage.storage_provider.upload_data(dump_key, None, data)
+        cloud_storage.storage_provider.upload_data(cloud_storage.storage_provider.encode_key(dump_key), None, data)
         cm.sync_with_cloud(dump_key)
         assert cm[dump_key] == data
 
         # Manual download and deserialisation:
         cm[load_key] = data
-        manual_download = cloud_storage.storage_provider.download_data(load_key, cm.etags[load_key])
+        manual_download = cloud_storage.storage_provider.download_data(
+            cloud_storage.storage_provider.encode_key(load_key), cm.etags[load_key]
+        )
         assert manual_download == data
 
         # Test default value
@@ -47,13 +49,17 @@ class CloudMappingUtilityTests:
 
         # Manual upload and serialisation:
         manual_upload = pickle.dumps(data)
-        cloud_storage.storage_provider.upload_data(dump_key, None, manual_upload)
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(dump_key), None, manual_upload
+        )
         cm.sync_with_cloud(dump_key)
         assert cm[dump_key] == data
 
         # Manual download and deserialisation:
         cm[load_key] = data
-        manual_download = cloud_storage.storage_provider.download_data(load_key, cm.etags[load_key])
+        manual_download = cloud_storage.storage_provider.download_data(
+            cloud_storage.storage_provider.encode_key(load_key), cm.etags[load_key]
+        )
         manual_download = pickle.loads(manual_download)
         assert manual_download == data
 
@@ -70,13 +76,17 @@ class CloudMappingUtilityTests:
 
         # Manual upload and serialisation:
         manual_upload = bytes(data, encoding="utf-8")
-        cloud_storage.storage_provider.upload_data(dump_key, None, manual_upload)
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(dump_key), None, manual_upload
+        )
         cm.sync_with_cloud(dump_key)
         assert cm[dump_key] == data
 
         # Manual download and deserialisation:
         cm[load_key] = data
-        manual_download = cloud_storage.storage_provider.download_data(load_key, cm.etags[load_key])
+        manual_download = cloud_storage.storage_provider.download_data(
+            cloud_storage.storage_provider.encode_key(load_key), cm.etags[load_key]
+        )
         manual_download = str(manual_download, encoding="utf-8")
         assert manual_download == data
 
@@ -93,13 +103,17 @@ class CloudMappingUtilityTests:
 
         # Manual upload and serialisation:
         manual_upload = bytes(json.dumps(data, sort_keys=True), encoding="utf-8")
-        cloud_storage.storage_provider.upload_data(dump_key, None, manual_upload)
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(dump_key), None, manual_upload
+        )
         cm.sync_with_cloud(dump_key)
         assert cm[dump_key] == data
 
         # Manual download and deserialisation:
         cm[load_key] = data
-        manual_download = cloud_storage.storage_provider.download_data(load_key, cm.etags[load_key])
+        manual_download = cloud_storage.storage_provider.download_data(
+            cloud_storage.storage_provider.encode_key(load_key), cm.etags[load_key]
+        )
         manual_download = json.loads(str(manual_download, encoding="utf-8"))
         assert manual_download == data
 
@@ -116,13 +130,17 @@ class CloudMappingUtilityTests:
 
         # Manual upload and serialisation:
         manual_upload = zlib.compress(bytes(json.dumps(data, sort_keys=True), encoding="utf-8"))
-        cloud_storage.storage_provider.upload_data(dump_key, None, manual_upload)
+        cloud_storage.storage_provider.upload_data(
+            cloud_storage.storage_provider.encode_key(dump_key), None, manual_upload
+        )
         cm.sync_with_cloud(dump_key)
         assert cm[dump_key] == data
 
         # Manual download and deserialisation:
         cm[load_key] = data
-        manual_download = cloud_storage.storage_provider.download_data(load_key, cm.etags[load_key])
+        manual_download = cloud_storage.storage_provider.download_data(
+            cloud_storage.storage_provider.encode_key(load_key), cm.etags[load_key]
+        )
         manual_download = json.loads(str(zlib.decompress(manual_download), encoding="utf-8"))
         assert manual_download == data
 

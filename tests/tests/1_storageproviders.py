@@ -65,35 +65,38 @@ class StorageProviderTests:
             assert etag is not None, (encoded_key, etag)
 
     def test_keys_and_etags_are_listed_with_prefix(self, storage_provider: StorageProvider, test_id: str):
-        root = test_id + "-etags-list-prefix/"
-        level_1 = root + "directory/"
-        level_2 = level_1 + "subdirectory/"
-        key = "key"
+        root = f"{test_id}-etags-list-prefix"
+        level_1 = f"{test_id}-etags-list-prefix/directory"
+        level_2 = f"{test_id}-etags-list-prefix/directory/subdirectory"
 
-        root_etag = storage_provider.upload_data(storage_provider.encode_key(root + key), None, b"data")
-        level_1_etag = storage_provider.upload_data(storage_provider.encode_key(level_1 + key), None, b"data")
-        level_2_etag = storage_provider.upload_data(storage_provider.encode_key(level_2 + key), None, b"data")
+        encoded_root_key = storage_provider.encode_key(f"{root}/key")
+        encoded_level_1_key = storage_provider.encode_key(f"{level_1}/key")
+        encoded_level_2_key = storage_provider.encode_key(f"{level_2}/key")
+
+        root_etag = storage_provider.upload_data(encoded_root_key, None, b"data")
+        level_1_etag = storage_provider.upload_data(encoded_level_1_key, None, b"data")
+        level_2_etag = storage_provider.upload_data(encoded_level_2_key, None, b"data")
 
         # Check root lists all keys
-        keys_and_etags = storage_provider.list_keys_and_etags(root)
+        keys_and_etags = storage_provider.list_keys_and_etags(storage_provider.encode_key(root))
         assert len(keys_and_etags) == 3
-        assert keys_and_etags[root + key] == root_etag
-        assert keys_and_etags[level_1 + key] == level_1_etag
-        assert keys_and_etags[level_2 + key] == level_2_etag
+        assert keys_and_etags[encoded_root_key] == root_etag
+        assert keys_and_etags[encoded_level_1_key] == level_1_etag
+        assert keys_and_etags[encoded_level_2_key] == level_2_etag
 
         # Check level 1 lists level 1 and level 2, but not root
-        keys_and_etags = storage_provider.list_keys_and_etags(level_1)
+        keys_and_etags = storage_provider.list_keys_and_etags(storage_provider.encode_key(level_1))
         assert len(keys_and_etags) == 2
-        assert root + key not in keys_and_etags
-        assert keys_and_etags[level_1 + key] == level_1_etag
-        assert keys_and_etags[level_2 + key] == level_2_etag
+        assert encoded_root_key not in keys_and_etags
+        assert keys_and_etags[encoded_level_1_key] == level_1_etag
+        assert keys_and_etags[encoded_level_2_key] == level_2_etag
 
         # Check level 2 only contains level 2 prefixed keys
-        keys_and_etags = storage_provider.list_keys_and_etags(level_2)
+        keys_and_etags = storage_provider.list_keys_and_etags(storage_provider.encode_key(level_2))
         assert len(keys_and_etags) == 1
-        assert root + key not in keys_and_etags
-        assert level_1 + key not in keys_and_etags
-        assert keys_and_etags[level_2 + key] == level_2_etag
+        assert encoded_root_key not in keys_and_etags
+        assert encoded_level_1_key not in keys_and_etags
+        assert keys_and_etags[encoded_level_2_key] == level_2_etag
 
     def test_keys_are_deleted(self, storage_provider: StorageProvider, test_id: str):
         key = test_id + "-keys-deleted-test"
