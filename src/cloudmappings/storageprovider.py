@@ -4,6 +4,8 @@ from urllib.parse import quote, unquote
 
 
 class StorageProvider(ABC):
+    """Provides a consistent interface for interacting with Cloud Storage Providers."""
+
     @abstractmethod
     def logical_name(self) -> str:
         """Returns a human readable string identifying the current implementation, and which
@@ -79,7 +81,7 @@ class StorageProvider(ABC):
         Parameters
         ----------
         key : str
-            The key specifying which data to download
+            The encoded key specifying which data to download
         etag : str or None
             Etag of the expected latest value in the cloud, or `None`
 
@@ -104,7 +106,7 @@ class StorageProvider(ABC):
         Parameters
         ----------
         key : str
-            The key specifying which data to download
+            The encoded key specifying which data to download
         etag : str or None
             Etag of the expected value in the cloud, `None` if it is expected that there is no
             existing data in the cloud
@@ -136,7 +138,7 @@ class StorageProvider(ABC):
         Parameters
         ----------
         key : str
-            The key specifying which data to delete
+            The encoded key specifying which data to delete
         etag : str or None
             Etag of the expected value in the cloud
 
@@ -158,7 +160,8 @@ class StorageProvider(ABC):
         Parameters
         ----------
         key_prefix : str, optional
-            A prefix specifying a subset of keys to query. If not given, all keys will be queried
+            An encoded prefix specifying a subset of keys to query. If not given, all keys will
+            be queried
 
         Returns
         -------
