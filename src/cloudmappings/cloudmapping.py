@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, MutableMapping, Optional, TypeVar
 
 from cloudmappings.serialisers import CloudMappingSerialisation
+from cloudmappings.storageprovider import StorageProvider
 
 T = TypeVar("T")
 
@@ -61,6 +62,14 @@ class CloudMapping(MutableMapping[str, T], ABC):
             mapping is prepended in combination with this parameter.
         """
         pass
+
+    @property
+    @abstractmethod
+    def storage_provider(self) -> StorageProvider:
+        """The underlying StorageProvider for this CloudMapping. This can be used to create another
+        CloudMapping instance (for example for a different view of the data), or just to directly
+        interact with the Cloud resource.
+        """
 
     @property
     @abstractmethod

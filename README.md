@@ -136,6 +136,8 @@ See the parameters of `CloudStorage.create_mapping()` above for their descriptio
 * `read_blindly_default: Any`
 
 ### Immutable Properties:
+* `storage_provider: StorageProvider`
+  * An object that provides a consistent interface to the underlying storage provider (eg methods to read and write bytes to specific paths).
 * `etags: dict[str, str]`
   * An internal dictionary of etags used to ensure the `CloudMapping` is in sync with the cloud storage resource. The dict maps keys to their last synchronised etags.
   * This dictionary is used as the `CloudMapping's expected view of the cloud. It is used to determine if a key exists, and ensure that the value of each key is expected.

@@ -32,6 +32,10 @@ class CloudMappingInternal(CloudMapping[T]):
         )
 
     @property
+    def storage_provider(self) -> StorageProvider:
+        return self._storage_provider
+
+    @property
     def etags(self) -> Dict[str, str]:
         return self._etags
 
